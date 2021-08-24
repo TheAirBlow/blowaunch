@@ -1,0 +1,36 @@
+{
+  "name": "blowaunch",
+  "version": "1.0.0",
+  "description": "Open-source linux only launcher for Minecraft",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/theairblow/blowaunch.git"
+  },
+  "author": "TheAirBlow",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/theairblow/blowaunch/issues"
+  },
+  "homepage": "https://github.com/theairblow/blowaunch#readme",
+  "dependencies": {
+    "blessed": "^0.1.81",
+    "cli-progress": "^3.9.0",
+    "colors": "^1.4.0",
+    "download": "^8.0.0",
+    "glob": "^7.1.7",
+    "http": "^0.0.1-security",
+    "node-fetch": "^2.6.1",
+    "node-popup": "^0.1.14",
+    "readline-sync": "^1.4.10",
+    "string-builder": "^0.1.8",
+    "uuid": "^8.3.2",
+    "yargs": "^17.1.1"
+  },
+  "devDependencies": {
+    "electron": "^13.2.2"
+  }
+}
