@@ -30,16 +30,16 @@ module.exports = {
         const file = dir + "/minecraft.jar";
         b1.start(1, 0);
         if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-            if (fs.existsSync(file)) {
-                b1.update(undefined, { file: "minecraft.jar", type: "Hash Check" });
-                    if (!this.checkHash(file, meta.downloads.client.sha1)) {
-                        b1.update(undefined, { file: "minecraft.jar", type: "Hash Mismatch" });
-                        await this.downloadFile(meta.downloads.client.url, "minecraft.jar", dir + "/", true);
-                    }
-            } else {
-                await this.downloadFile(meta.downloads.client.url, "minecraft.jar", dir + "/", true);
-                b1.update(undefined, { file: "minecraft.jar", type: "Download" });
-            }  
+        if (fs.existsSync(file)) {
+            b1.update(undefined, { file: "minecraft.jar", type: "Hash Check" });
+                if (!this.checkHash(file, meta.downloads.client.sha1)) {
+                    b1.update(undefined, { file: "minecraft.jar", type: "Hash Mismatch" });
+                    await this.downloadFile(meta.downloads.client.url, "minecraft.jar", dir + "/", true);
+                }
+        } else {
+            await this.downloadFile(meta.downloads.client.url, "minecraft.jar", dir + "/", true);
+            b1.update(undefined, { file: "minecraft.jar", type: "Download" });
+        }  
         
         b1.increment();
         b1.stop();
