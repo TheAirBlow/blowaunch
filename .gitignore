@@ -1,0 +1,6 @@
+.idea/
+*.DotSettings.user
+Blowaunch.Library/bin/
+Blowaunch.Library/obj/
+Blowaunch.Avalonia/bin/
+Blowaunch.Avalonia/obj/

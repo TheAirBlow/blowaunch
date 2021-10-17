@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blowaunch.Avalonia", "Blowaunch.Avalonia\Blowaunch.Avalonia.csproj", "{29314EF5-68CE-47DD-A117-E5332E1F5EA9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blowaunch.Library", "Blowaunch.Library\Blowaunch.Library.csproj", "{27DC3015-615E-4B0E-B6C0-A59228F8695C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{29314EF5-68CE-47DD-A117-E5332E1F5EA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29314EF5-68CE-47DD-A117-E5332E1F5EA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29314EF5-68CE-47DD-A117-E5332E1F5EA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29314EF5-68CE-47DD-A117-E5332E1F5EA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27DC3015-615E-4B0E-B6C0-A59228F8695C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27DC3015-615E-4B0E-B6C0-A59228F8695C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27DC3015-615E-4B0E-B6C0-A59228F8695C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27DC3015-615E-4B0E-B6C0-A59228F8695C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
