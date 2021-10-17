@@ -29,16 +29,18 @@ namespace Blowaunch.Library
                 /// </summary>
                 public enum AuthType
                 {
+                    [JsonProperty("pretendMicrosoft")] PretendMicrosoft,
                     [JsonProperty("microsoft")] Microsoft,
                     [JsonProperty("mojang")] Mojang,
                     [JsonProperty("none")] None
                 }
-                
+
+                [JsonProperty("validUntil")] public DateTime ValidUntil;
+                [JsonProperty("xuid")] public string RefreshToken;
                 [JsonProperty("type")] public AuthType Type;
-                [JsonProperty("xuid")] public string Xuid;
-                [JsonProperty("clientid")] public string ClientId;
-                [JsonProperty("uuid")] public string Uuid;
                 [JsonProperty("token")] public string Token;
+                [JsonProperty("xuid")] public string Xuid;
+                [JsonProperty("uuid")] public string Uuid;
             }
             
             [JsonProperty("maxRam")] public string RamMax;
@@ -155,7 +157,7 @@ namespace Blowaunch.Library
         /// <returns></returns>
         private static string ReplacerGame(Configuration config, string str, BlowaunchMainJson main)
         {
-            string newstr = str;
+            string newstr = str.Replace("${clientid}", "minecraft");
             newstr = newstr.Replace("${auth_player_name}", config.UserName)
                 .Replace("${assets_root}", FilesManager.Directories.AssetsRoot)
                 .Replace("${game_directory}", FilesManager.Directories.Root)
@@ -172,14 +174,17 @@ namespace Blowaunch.Library
                 newstr = newstr.Replace("${user_type}", config.Auth.Type.ToString().ToLower());
                 switch (config.Auth.Type) {
                     case Configuration.AuthClass.AuthType.Microsoft:
-                        newstr = newstr.Replace("${clientid}", config.Auth.ClientId)
-                            .Replace("${auth_access_token}", "noauth")
+                        newstr = newstr.Replace("${auth_access_token}", config.Auth.Token)
+                            .Replace("${auth_xuid}", config.Auth.Xuid)
+                            .Replace("${auth_uuid}", "noauth");
+                        break;
+                    case Configuration.AuthClass.AuthType.PretendMicrosoft:
+                        newstr = newstr.Replace("${auth_access_token}", config.Auth.Token)
                             .Replace("${auth_xuid}", config.Auth.Xuid)
                             .Replace("${auth_uuid}", "noauth");
                         break;
                     case Configuration.AuthClass.AuthType.Mojang:
-                        newstr = newstr.Replace("${clientid}", "noauth")
-                            .Replace("${auth_access_token}", config.Auth.Token)
+                        newstr = newstr.Replace("${auth_access_token}", config.Auth.Token)
                             .Replace("${auth_xuid}", "noauth")
                             .Replace("${auth_uuid}", config.Auth.Uuid);
                         break;
