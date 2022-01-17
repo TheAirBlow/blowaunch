@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 
@@ -17,21 +18,18 @@ namespace Blowaunch.Library
         /// <returns></returns>
         public static BlowaunchAssetsJson MojangToBlowaunch(MojangAssetsJson mojang)
         {
-            var json = new BlowaunchAssetsJson
-            {
+            var json = new BlowaunchAssetsJson {
                 Author = "TheAirBlow",
                 Information = "Mojang -> Blowaunch"
             };
-            var list = new List<JsonAsset>();
-            Console.WriteLine(new StringBuilder().AppendFormat(Fetcher.MojangEndpoints.Asset, "75648545789215478548521478562483245156879").ToString());
-            foreach (KeyValuePair<string, MojangAssetsJson.JsonAsset> pair in mojang.Assets)
-                list.Add(new JsonAsset {
-                    Name = pair.Key,
-                    ShaHash = pair.Value.ShaHash,
-                    Size = pair.Value.Size,
-                    Url = new StringBuilder().AppendFormat(Fetcher.MojangEndpoints.Asset, pair.Value.ShaHash).ToString()
-                });
-            json.Assets = list.ToArray();
+            json.Assets = mojang.Assets.Select(pair => new JsonAsset {
+                Name = pair.Key, 
+                ShaHash = pair.Value.ShaHash, 
+                Size = pair.Value.Size, 
+                Url = new StringBuilder()
+                    .AppendFormat(Fetcher.MojangEndpoints.Asset, 
+                        pair.Value.ShaHash).ToString()
+            }).ToArray();
             return json;
         }
         

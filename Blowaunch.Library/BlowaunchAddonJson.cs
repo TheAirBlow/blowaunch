@@ -19,8 +19,7 @@ namespace Blowaunch.Library
         [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
         private static BlowaunchAddonJson ProcessLibraries(BlowaunchAddonJson json)
         {
-            foreach (BlowaunchMainJson.JsonLibrary lib in json.Libraries)
-            {
+            foreach (BlowaunchMainJson.JsonLibrary lib in json.Libraries) {
                 if (lib.Url == null) {
                     lib.Url = lib.Platform == "any" ? new StringBuilder().AppendFormat(Fetcher.MojangEndpoints.Library, lib.Package, lib.Name, lib.Version, string.Empty).ToString()
                         : new StringBuilder().AppendFormat(Fetcher.MojangEndpoints.Library, lib.Package, lib.Name, lib.Version, $"-natives-{lib.Platform}").ToString();
@@ -37,8 +36,8 @@ namespace Blowaunch.Library
         /// <summary>
         /// Converts Blowaunch -> Mojang
         /// </summary>
-        /// <param name="mojang"></param>
-        /// <returns></returns>
+        /// <param name="mojang">Mojang JSON</param>
+        /// <returns>Blowaunch JSON</returns>
         public static BlowaunchAddonJson MojangToBlowaunch(MojangMainJson mojang)
         {
             var json = new BlowaunchAddonJson {
@@ -49,51 +48,39 @@ namespace Blowaunch.Library
             };
             
             var libraries = new List<BlowaunchMainJson.JsonLibrary>();
-            foreach (var lib in mojang.Libraries)
-            {
-                var newlibs = new List<BlowaunchMainJson.JsonLibrary>();
-                var newlib = new BlowaunchMainJson.JsonLibrary();
-                string[] split = lib.Name.Split(':');
-                newlib.Package = split[0];
-                newlib.Name = split[1];
-                newlib.Version = split[2];
-                var main = JsonConvert.DeserializeObject<BlowaunchMainJson.JsonLibrary>(JsonConvert.SerializeObject(newlib));
+            foreach (var lib in mojang.Libraries) {
+                var main = new BlowaunchMainJson.JsonLibrary();
+                var split = lib.Name.Split(':');
+                main.Package = split[0];
+                main.Name = split[1];
+                main.Version = split[2];
                 main.Platform = "any";
                 main.Size = lib.Downloads.Artifact.Size;
                 main.ShaHash = lib.Downloads.Artifact.ShaHash;
                 main.Url = lib.Downloads.Artifact.Url;
                 libraries.Add(main);
                 if (lib.Natives != null) {
-                    foreach (var native in lib.Natives)
-                    {
-                        var clone = JsonConvert.DeserializeObject<BlowaunchMainJson.JsonLibrary>(JsonConvert.SerializeObject(newlib));
-                        switch (native)
-                        {
-                            case "natives-linux":
-                                clone.Size = lib.Downloads.Classifiers.NativeLinux.Size;
-                                clone.ShaHash = lib.Downloads.Classifiers.NativeLinux.ShaHash;
-                                clone.Url = lib.Downloads.Classifiers.NativeLinux.Url;
-                                break;
-                            case "natives-windows":
-                                clone.Size = lib.Downloads.Classifiers.NativeWindows.Size;
-                                clone.ShaHash = lib.Downloads.Classifiers.NativeWindows.ShaHash;
-                                clone.Url = lib.Downloads.Classifiers.NativeWindows.Url;
-                                break;
-                            case "natives-macos":
-                                clone.Size = lib.Downloads.Classifiers.NativeMacOs.Size;
-                                clone.ShaHash = lib.Downloads.Classifiers.NativeMacOs.ShaHash;
-                                clone.Url = lib.Downloads.Classifiers.NativeMacOs.Url;
-                                break;
-                            case "natives-osx":
-                                clone.Size = lib.Downloads.Classifiers.NativeOsx.Size;
-                                clone.ShaHash = lib.Downloads.Classifiers.NativeOsx.ShaHash;
-                                clone.Url = lib.Downloads.Classifiers.NativeOsx.Url;
-                                break;
-                        }
-                        libraries.Add(clone);
+                    var clone = main;
+                    if (lib.Downloads.Classifiers.NativeLinux != null) {
+                        clone.Size = lib.Downloads.Classifiers.NativeLinux.Size;
+                        clone.ShaHash = lib.Downloads.Classifiers.NativeLinux.ShaHash;
+                        clone.Url = lib.Downloads.Classifiers.NativeLinux.Url;
+                    } else if (lib.Downloads.Classifiers.NativeWindows != null) {
+                        clone.Size = lib.Downloads.Classifiers.NativeWindows.Size;
+                        clone.ShaHash = lib.Downloads.Classifiers.NativeWindows.ShaHash;
+                        clone.Url = lib.Downloads.Classifiers.NativeWindows.Url;
+                    } else if (lib.Downloads.Classifiers.NativeMacOs != null) {
+                        clone.Size = lib.Downloads.Classifiers.NativeMacOs.Size;
+                        clone.ShaHash = lib.Downloads.Classifiers.NativeMacOs.ShaHash;
+                        clone.Url = lib.Downloads.Classifiers.NativeMacOs.Url;
+                    } else if (lib.Downloads.Classifiers.NativeOsx != null) {
+                        clone.Size = lib.Downloads.Classifiers.NativeOsx.Size;
+                        clone.ShaHash = lib.Downloads.Classifiers.NativeOsx.ShaHash;
+                        clone.Url = lib.Downloads.Classifiers.NativeOsx.Url;
                     }
+                    
+                    libraries.Add(clone);
                 }
-                libraries.Add(newlib);
             }
 
             json.Libraries = libraries.ToArray();

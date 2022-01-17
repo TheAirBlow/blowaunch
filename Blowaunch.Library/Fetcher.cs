@@ -6,7 +6,7 @@ namespace Blowaunch.Library
     {
         public static class MojangEndpoints
         {
-            public const string Versions = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
+            public const string Versions = "http://launchermeta.mojang.com/mc/game/version_manifest.json";
             public const string Library =
                 "https://libraries.minecraft.net/{0}/{1}/{2}/{1}-{2}{3}.jar";
             public const string LibraryHash =

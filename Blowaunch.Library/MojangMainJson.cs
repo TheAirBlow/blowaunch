@@ -120,7 +120,7 @@ namespace Blowaunch.Library
         {
             [JsonProperty("downloads")] public JsonLibraryDownloads Downloads;
             [JsonProperty("rules")] public JsonLibraryRule[] Rules;
-            [JsonProperty("natives")] public string[] Natives;
+            [JsonProperty("natives")] public Dictionary<string, string> Natives;
             [JsonProperty("name")] public string Name;
         }
 
@@ -157,7 +157,7 @@ namespace Blowaunch.Library
         [JsonProperty("libraries")] public JsonLibrary[] Libraries;
         [JsonProperty("downloads")] public JsonDownloads Downloads;
         [JsonProperty("javaVersion")] public JsonJava JavaVersion;
-        [JsonProperty("args")] public JsonArguments Arguments;
+        [JsonProperty("arguments")] public JsonArguments Arguments;
         [JsonProperty("assetIndex")] public JsonAssets Assets;
         [JsonProperty("logging")] public JsonLogging Logging;
         [JsonProperty("mainClass")] public string MainClass;

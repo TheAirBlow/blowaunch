@@ -18,7 +18,7 @@ namespace Blowaunch.Library.Downloader
         public static class Directories
         {
             public static readonly string Root =
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), ".minecraft");
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft");
             public static readonly string AssetsRoot =
                 Path.Combine(Root, "assets");
             public static readonly string AssetsObjects =
@@ -73,10 +73,10 @@ namespace Blowaunch.Library.Downloader
             string path;
             if (library.Platform == "any")
                 path = Path.Combine(Directories.LibrariesRoot,
-                    string.Join(Path.PathSeparator, library.Package.Split('.')),
+                    string.Join(Path.PathSeparator, library.Package.Replace(':', Path.PathSeparator)),
                     library.Name, library.Version, $"{library.Name}-{library.Version}.jar");
             else path = Path.Combine(Directories.LibrariesRoot, 
-                string.Join(Path.PathSeparator, library.Package.Split('.')), 
+                string.Join(Path.PathSeparator, library.Package.Replace(':', Path.PathSeparator)), 
                 library.Name, library.Version, $"{library.Name}-{library.Version}-natives-{library.Platform}.jar");
             return path;
         }

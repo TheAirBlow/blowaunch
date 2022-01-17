@@ -21,8 +21,7 @@ namespace Blowaunch.Library
         [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
         private static BlowaunchMainJson ProcessLibraries(BlowaunchMainJson json)
         {
-            foreach (JsonLibrary lib in json.Libraries)
-            {
+            foreach (JsonLibrary lib in json.Libraries) {
                 if (lib.Url == null) {
                     lib.Url = lib.Platform == "any" ? new StringBuilder().AppendFormat(Fetcher.MojangEndpoints.Library, string.Join("\\", lib.Package.Split('.')), 
                             lib.Name, lib.Version, string.Empty).ToString()
@@ -67,82 +66,79 @@ namespace Blowaunch.Library
             };
             var gameArguments = new List<JsonArgument>();
             var jvmArguments = new List<JsonArgument>();
-            foreach (var obj in mojang.Arguments.Game)
-            {
+            foreach (var obj in mojang.Arguments.Game) {
                 var arg = new JsonArgument();
-                var nonstring = JsonConvert.DeserializeObject<MojangMainJson.JsonNonStringArgument>((string) obj);
-                if (nonstring == null)
-                {
-                    arg.Value = (string) obj;
-                    gameArguments.Add(arg);
-                    continue;
-                }
-
-                var collection = JsonConvert.DeserializeObject<List<string>>((string) obj);
-                if (collection == null) arg.Value = (string) nonstring.Value;
-                else arg.ValueList = collection.ToArray();
-                var list1 = new List<string>();
-                var list2 = new List<string>();
-                foreach (var rule in nonstring.Rules)
-                {
-                    switch (rule.Action)
-                    {
-                        case MojangMainJson.JsonAction.Allow:
-                            foreach (var pair in rule.Features)
-                                list1.Add(pair.Key);
-                            break;
-                        case MojangMainJson.JsonAction.Disallow:
-                            foreach (var pair in rule.Features)
-                                list2.Add(pair.Key);
-                            break;
+                try {
+                    var nonstring = JsonConvert.DeserializeObject<MojangMainJson.JsonNonStringArgument>((string) obj);
+                    if (nonstring == null) {
+                        arg.Value = (string) obj;
+                        gameArguments.Add(arg);
+                        continue;
                     }
-                }
-                arg.Allow = list1.ToArray();
-                arg.Disallow = list2.ToArray();
-                gameArguments.Add(arg);
+                    
+                    var collection = JsonConvert.DeserializeObject<List<string>>((string) obj);
+                    if (collection == null) arg.Value = (string) nonstring.Value;
+                    else arg.ValueList = collection.ToArray();
+                    var list1 = new List<string>();
+                    var list2 = new List<string>();
+                    foreach (var rule in nonstring.Rules) {
+                        switch (rule.Action) {
+                            case MojangMainJson.JsonAction.Allow:
+                                foreach (var pair in rule.Features)
+                                    list1.Add(pair.Key);
+                                break;
+                            case MojangMainJson.JsonAction.Disallow:
+                                foreach (var pair in rule.Features)
+                                    list2.Add(pair.Key);
+                                break;
+                        }
+                    }
+                    arg.Allow = list1.ToArray();
+                    arg.Disallow = list2.ToArray();
+                    gameArguments.Add(arg);
+                } catch { /* Ignore */ }
             }
             
             foreach (var obj in mojang.Arguments.Java)
             {
                 var arg = new JsonArgument();
-                var nonstring = JsonConvert.DeserializeObject<MojangMainJson.JsonNonStringArgument>((string) obj);
-                if (nonstring == null)
-                {
-                    arg.Value = (string) obj;
-                    jvmArguments.Add(arg);
-                    continue;
-                }
-
-                var collection = JsonConvert.DeserializeObject<List<string>>((string) obj);
-                if (collection == null) arg.Value = (string) nonstring.Value;
-                else arg.ValueList = collection.ToArray();
-                var list1 = new List<string>();
-                var list2 = new List<string>();
-                foreach (var rule in nonstring.Rules)
-                {
-                    switch (rule.Action)
-                    {
-                        case MojangMainJson.JsonAction.Allow:
-                            foreach (var pair in rule.Features)
-                                list1.Add(pair.Key);
-                            if (!string.IsNullOrEmpty(rule.Os.Name))
-                                list1.Add($"os-name:{rule.Os.Name}");
-                            if (!string.IsNullOrEmpty(rule.Os.Version))
-                                list1.Add($"os-version:{rule.Os.Version}");
-                            break;
-                        case MojangMainJson.JsonAction.Disallow:
-                            foreach (var pair in rule.Features)
-                                list2.Add(pair.Key);
-                            if (!string.IsNullOrEmpty(rule.Os.Name))
-                                list2.Add($"os-name:{rule.Os.Name}");
-                            if (!string.IsNullOrEmpty(rule.Os.Version))
-                                list2.Add($"os-version:{rule.Os.Version}");
-                            break;
+                try {
+                    var nonstring = JsonConvert.DeserializeObject<MojangMainJson.JsonNonStringArgument>((string) obj);
+                    if (nonstring == null) {
+                        arg.Value = (string) obj;
+                        jvmArguments.Add(arg);
+                        continue;
                     }
-                }
-                arg.Allow = list1.ToArray();
-                arg.Disallow = list2.ToArray();
-                jvmArguments.Add(arg);
+
+                    var collection = JsonConvert.DeserializeObject<List<string>>((string) obj);
+                    if (collection == null) arg.Value = (string) nonstring.Value;
+                    else arg.ValueList = collection.ToArray();
+                    var list1 = new List<string>();
+                    var list2 = new List<string>();
+                    foreach (var rule in nonstring.Rules) {
+                        switch (rule.Action) {
+                            case MojangMainJson.JsonAction.Allow:
+                                foreach (var pair in rule.Features)
+                                    list1.Add(pair.Key);
+                                if (!string.IsNullOrEmpty(rule.Os.Name))
+                                    list1.Add($"os-name:{rule.Os.Name}");
+                                if (!string.IsNullOrEmpty(rule.Os.Version))
+                                    list1.Add($"os-version:{rule.Os.Version}");
+                                break;
+                            case MojangMainJson.JsonAction.Disallow:
+                                foreach (var pair in rule.Features)
+                                    list2.Add(pair.Key);
+                                if (!string.IsNullOrEmpty(rule.Os.Name))
+                                    list2.Add($"os-name:{rule.Os.Name}");
+                                if (!string.IsNullOrEmpty(rule.Os.Version))
+                                    list2.Add($"os-version:{rule.Os.Version}");
+                                break;
+                        }
+                    }
+                    arg.Allow = list1.ToArray();
+                    arg.Disallow = list2.ToArray();
+                    jvmArguments.Add(arg);
+                } catch { /* Ignore */ }
             }
 
             json.Arguments.Game = gameArguments.ToArray();
@@ -150,49 +146,38 @@ namespace Blowaunch.Library
             var libraries = new List<JsonLibrary>();
             foreach (var lib in mojang.Libraries)
             {
-                var newlibs = new List<JsonLibrary>();
-                var newlib = new JsonLibrary();
+                var main = new JsonLibrary();
                 string[] split = lib.Name.Split(':');
-                newlib.Package = split[0];
-                newlib.Name = split[1];
-                newlib.Version = split[2];
-                var main = JsonConvert.DeserializeObject<JsonLibrary>(JsonConvert.SerializeObject(newlib));
+                main.Package = split[0];
+                main.Name = split[1];
+                main.Version = split[2];
                 main.Platform = "any";
                 main.Size = lib.Downloads.Artifact.Size;
                 main.ShaHash = lib.Downloads.Artifact.ShaHash;
                 main.Url = lib.Downloads.Artifact.Url;
                 libraries.Add(main);
                 if (lib.Natives != null) {
-                    foreach (var native in lib.Natives)
-                    {
-                        var clone = JsonConvert.DeserializeObject<JsonLibrary>(JsonConvert.SerializeObject(newlib));
-                        switch (native)
-                        {
-                            case "natives-linux":
-                                clone.Size = lib.Downloads.Classifiers.NativeLinux.Size;
-                                clone.ShaHash = lib.Downloads.Classifiers.NativeLinux.ShaHash;
-                                clone.Url = lib.Downloads.Classifiers.NativeLinux.Url;
-                                break;
-                            case "natives-windows":
-                                clone.Size = lib.Downloads.Classifiers.NativeWindows.Size;
-                                clone.ShaHash = lib.Downloads.Classifiers.NativeWindows.ShaHash;
-                                clone.Url = lib.Downloads.Classifiers.NativeWindows.Url;
-                                break;
-                            case "natives-macos":
-                                clone.Size = lib.Downloads.Classifiers.NativeMacOs.Size;
-                                clone.ShaHash = lib.Downloads.Classifiers.NativeMacOs.ShaHash;
-                                clone.Url = lib.Downloads.Classifiers.NativeMacOs.Url;
-                                break;
-                            case "natives-osx":
-                                clone.Size = lib.Downloads.Classifiers.NativeOsx.Size;
-                                clone.ShaHash = lib.Downloads.Classifiers.NativeOsx.ShaHash;
-                                clone.Url = lib.Downloads.Classifiers.NativeOsx.Url;
-                                break;
-                        }
-                        libraries.Add(clone);
+                    var clone = main;
+                    if (lib.Downloads.Classifiers.NativeLinux != null) {
+                        clone.Size = lib.Downloads.Classifiers.NativeLinux.Size;
+                        clone.ShaHash = lib.Downloads.Classifiers.NativeLinux.ShaHash;
+                        clone.Url = lib.Downloads.Classifiers.NativeLinux.Url;
+                    } else if (lib.Downloads.Classifiers.NativeWindows != null) {
+                        clone.Size = lib.Downloads.Classifiers.NativeWindows.Size;
+                        clone.ShaHash = lib.Downloads.Classifiers.NativeWindows.ShaHash;
+                        clone.Url = lib.Downloads.Classifiers.NativeWindows.Url;
+                    } else if (lib.Downloads.Classifiers.NativeMacOs != null) {
+                        clone.Size = lib.Downloads.Classifiers.NativeMacOs.Size;
+                        clone.ShaHash = lib.Downloads.Classifiers.NativeMacOs.ShaHash;
+                        clone.Url = lib.Downloads.Classifiers.NativeMacOs.Url;
+                    } else if (lib.Downloads.Classifiers.NativeOsx != null) {
+                        clone.Size = lib.Downloads.Classifiers.NativeOsx.Size;
+                        clone.ShaHash = lib.Downloads.Classifiers.NativeOsx.ShaHash;
+                        clone.Url = lib.Downloads.Classifiers.NativeOsx.Url;
                     }
+                    
+                    libraries.Add(clone);
                 }
-                libraries.Add(newlib);
             }
 
             json.Libraries = libraries.ToArray();
@@ -279,10 +264,13 @@ namespace Blowaunch.Library
         /// <summary>
         /// Blowaunch Main JSON - Type
         /// </summary>
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
         public enum JsonType
         {
-            [JsonProperty("snapshot")] Snapshot,
-            [JsonProperty("release")] Release
+            snapshot,
+            release,
+            old_alpha,
+            old_beta
         }
         
         [JsonProperty("version")] public string Version;

@@ -42,7 +42,7 @@ namespace Blowaunch.Library
                 [JsonProperty("xuid")] public string Xuid;
                 [JsonProperty("uuid")] public string Uuid;
             }
-            
+
             [JsonProperty("maxRam")] public string RamMax;
             [JsonProperty("jvmArgs")] public string JvmArgs;
             [JsonProperty("gameArgs")] public string GameArgs;
@@ -62,58 +62,56 @@ namespace Blowaunch.Library
         /// <returns>Generated command</returns>
         public static string GenerateCommand(BlowaunchMainJson main, Configuration config, Logger logger)
         {
+            logger.Information("[Runner] Generating command");
             var sb = new StringBuilder();
             sb.Append(string.IsNullOrEmpty(config.JvmArgs)
                 ? $"-Xms{config.RamMax} -Xmx{config.RamMax} "
                 : $"-Xms{config.RamMax} -Xmx{config.RamMax} {config.JvmArgs} ");
-            foreach (BlowaunchMainJson.JsonArgument arg in main.Arguments.Java)
-            {
+            foreach (BlowaunchMainJson.JsonArgument arg in main.Arguments.Java) {
                 bool process = true;
-                foreach (string str in arg.Disallow)
-                {
+                foreach (string str in arg.Disallow) {
                     if (process == false) continue;
                     process = !CheckBool(config, str);
                 }
+
                 if (process == false) continue;
-                foreach (string str in arg.Allow)
-                {
+                foreach (string str in arg.Allow) {
                     if (process == false) continue;
                     process = CheckBool(config, str);
                 }
+
                 if (process == false) continue;
-                if (arg.ValueList.Length != 0)
-                {
-                    foreach (string str in arg.ValueList)
-                        sb.Append($"{ReplacerJava(main, str)} ");
+                if (arg.ValueList.Length != 0) {
+                    foreach (string str in arg.ValueList) sb.Append($"{ReplacerJava(main, str)} ");
                     continue;
                 }
 
                 sb.Append($"{ReplacerJava(main, arg.Value)} ");
             }
-            foreach (BlowaunchMainJson.JsonArgument arg in main.Arguments.Game)
-            {
+
+            foreach (BlowaunchMainJson.JsonArgument arg in main.Arguments.Game) {
                 bool process = true;
-                foreach (string str in arg.Disallow)
-                {
+                foreach (string str in arg.Disallow) {
                     if (process == false) continue;
                     process = !CheckBool(config, str);
                 }
+
                 if (process == false) continue;
-                foreach (string str in arg.Allow)
-                {
+                foreach (string str in arg.Allow) {
                     if (process == false) continue;
                     process = CheckBool(config, str);
                 }
+
                 if (process == false) continue;
-                if (arg.ValueList.Length != 0)
-                {
-                    foreach (string str in arg.ValueList)
-                        sb.Append($"{ReplacerGame(config, str, main)} ");
+                if (arg.ValueList.Length != 0) {
+                    foreach (string str in arg.ValueList) sb.Append($"{ReplacerGame(config, str, main)} ");
                     continue;
                 }
 
                 sb.Append($"{ReplacerGame(config, arg.Value, main)} ");
             }
+
+            logger.Information($"[Runner] Full command: {sb}");
             return sb.ToString();
         }
 
@@ -125,15 +123,15 @@ namespace Blowaunch.Library
         private static string GenerateClasspath(BlowaunchMainJson main)
         {
             var sb = new StringBuilder();
-            for (var index = 0; index < main.Libraries.Length; index++)
-            {
+            for (var index = 0; index < main.Libraries.Length; index++) {
                 BlowaunchMainJson.JsonLibrary lib = main.Libraries[index];
                 if (index == main.Libraries.Length - 1) sb.Append($"{FilesManager.GetLibraryPath(lib)}");
                 else sb.Append($"{FilesManager.GetLibraryPath(lib)}:");
             }
+
             return sb.ToString();
-        } 
-        
+        }
+
         /// <summary>
         /// Replaces arguments with required values
         /// </summary>
@@ -142,12 +140,11 @@ namespace Blowaunch.Library
         /// <returns></returns>
         private static string ReplacerJava(BlowaunchMainJson main, string str)
         {
-            return str.Replace("-Djava.library.path=${natives_directory}", "")
-                .Replace("${launcher_name}", "Blowaunch")
+            return str.Replace("-Djava.library.path=${natives_directory}", "").Replace("${launcher_name}", "Blowaunch")
                 .Replace("${launcher_version}", Assembly.GetExecutingAssembly().GetName().FullName)
                 .Replace("${classpath}", GenerateClasspath(main));
         }
-        
+
         /// <summary>
         /// Replaces arguments with required values
         /// </summary>
@@ -162,34 +159,30 @@ namespace Blowaunch.Library
                 .Replace("${assets_root}", FilesManager.Directories.AssetsRoot)
                 .Replace("${game_directory}", FilesManager.Directories.Root)
                 .Replace("${version_type}", main.Type.ToString().ToLower())
-                .Replace("${assets_index_name}", main.Assets.Id)
-                .Replace("${version_name}", main.Version);
+                .Replace("${assets_index_name}", main.Assets.Id).Replace("${version_name}", main.Version);
             if (config.Auth.Type == Configuration.AuthClass.AuthType.None)
-                newstr = newstr.Replace("${clientid}", "noauth")
-                    .Replace("${auth_access_token}", "noauth")
-                    .Replace("${user_type}", "noauth")
-                    .Replace("${auth_xuid}", "noauth")
+                newstr = newstr.Replace("${clientid}", "noauth").Replace("${auth_access_token}", "noauth")
+                    .Replace("${user_type}", "noauth").Replace("${auth_xuid}", "noauth")
                     .Replace("${auth_uuid}", "noauth");
-            else {
+            else
+            {
                 newstr = newstr.Replace("${user_type}", config.Auth.Type.ToString().ToLower());
                 switch (config.Auth.Type) {
                     case Configuration.AuthClass.AuthType.Microsoft:
                         newstr = newstr.Replace("${auth_access_token}", config.Auth.Token)
-                            .Replace("${auth_xuid}", config.Auth.Xuid)
-                            .Replace("${auth_uuid}", "noauth");
+                            .Replace("${auth_xuid}", config.Auth.Xuid).Replace("${auth_uuid}", "noauth");
                         break;
                     case Configuration.AuthClass.AuthType.PretendMicrosoft:
                         newstr = newstr.Replace("${auth_access_token}", config.Auth.Token)
-                            .Replace("${auth_xuid}", config.Auth.Xuid)
-                            .Replace("${auth_uuid}", "noauth");
+                            .Replace("${auth_xuid}", config.Auth.Xuid).Replace("${auth_uuid}", "noauth");
                         break;
                     case Configuration.AuthClass.AuthType.Mojang:
                         newstr = newstr.Replace("${auth_access_token}", config.Auth.Token)
-                            .Replace("${auth_xuid}", "noauth")
-                            .Replace("${auth_uuid}", config.Auth.Uuid);
+                            .Replace("${auth_xuid}", "noauth").Replace("${auth_uuid}", config.Auth.Uuid);
                         break;
                 }
             }
+
             return newstr;
         }
 
@@ -201,12 +194,9 @@ namespace Blowaunch.Library
         /// <returns></returns>
         private static bool CheckBool(Configuration config, string str)
         {
-            switch (str)
-            {
-                case "is_demo_user":
-                    return config.DemoUser;
-                case "has_custom_resolution":
-                    return config.CustomWindowSize;
+            switch (str) {
+                case "is_demo_user": return config.DemoUser;
+                case "has_custom_resolution": return config.CustomWindowSize;
                 default:
                     if (str.StartsWith("os-name:"))
                         return Environment.OSVersion.Platform.ToString().ToLower() == str.Substring(8);
@@ -224,8 +214,10 @@ namespace Blowaunch.Library
         /// <param name="addon">Blowaunch Addon JSON</param>
         /// <param name="config">Configuration</param>
         /// <returns>Generated command</returns>
-        public static string GenerateCommand(BlowaunchMainJson main, BlowaunchAddonJson addon, Configuration config, Logger logger)
+        public static string GenerateCommand(BlowaunchMainJson main, BlowaunchAddonJson addon, Configuration config,
+            Logger logger) 
         {
+            logger.Information("[Runner] Blowaunch Addon JSON is used");
             var newlibs = main.Libraries.ToList();
             newlibs.AddRange(addon.Libraries);
             main.Libraries = newlibs.ToArray();

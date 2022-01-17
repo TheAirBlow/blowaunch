@@ -1,0 +1,164 @@
+{
+  "format": 1,
+  "restore": {
+    "/home/theairblow/RiderProjects/blowaunch/Blowaunch.ConsoleApp/Blowaunch.ConsoleApp.csproj": {}
+  },
+  "projects": {
+    "/home/theairblow/RiderProjects/blowaunch/Blowaunch.ConsoleApp/Blowaunch.ConsoleApp.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/theairblow/RiderProjects/blowaunch/Blowaunch.ConsoleApp/Blowaunch.ConsoleApp.csproj",
+        "projectName": "Blowaunch.ConsoleApp",
+        "projectPath": "/home/theairblow/RiderProjects/blowaunch/Blowaunch.ConsoleApp/Blowaunch.ConsoleApp.csproj",
+        "packagesPath": "/home/theairblow/.nuget/packages/",
+        "outputPath": "/home/theairblow/RiderProjects/blowaunch/Blowaunch.ConsoleApp/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/home/theairblow/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net5.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {
+              "/home/theairblow/RiderProjects/blowaunch/Blowaunch.Library/Blowaunch.Library.csproj": {
+                "projectPath": "/home/theairblow/RiderProjects/blowaunch/Blowaunch.Library/Blowaunch.Library.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "dependencies": {
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "Serilog": {
+              "target": "Package",
+              "version": "[2.10.0, )"
+            },
+            "Serilog.Sinks.Console": {
+              "target": "Package",
+              "version": "[4.0.1, )"
+            },
+            "Serilog.Sinks.File": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[5.0.0, 5.0.0]"
+            }
+          ],
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/5.0.402/RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/home/theairblow/RiderProjects/blowaunch/Blowaunch.Library/Blowaunch.Library.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/theairblow/RiderProjects/blowaunch/Blowaunch.Library/Blowaunch.Library.csproj",
+        "projectName": "Blowaunch.Library",
+        "projectPath": "/home/theairblow/RiderProjects/blowaunch/Blowaunch.Library/Blowaunch.Library.csproj",
+        "packagesPath": "/home/theairblow/.nuget/packages/",
+        "outputPath": "/home/theairblow/RiderProjects/blowaunch/Blowaunch.Library/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/home/theairblow/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net5.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "dependencies": {
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "Serilog": {
+              "target": "Package",
+              "version": "[2.10.0, )"
+            },
+            "Serilog.Sinks.Console": {
+              "target": "Package",
+              "version": "[4.0.0, )"
+            },
+            "Serilog.Sinks.File": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[5.0.0, 5.0.0]"
+            }
+          ],
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/5.0.402/RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
