@@ -1,4 +1,7 @@
 {
+  "baseVersion": "1.12.2",
+  "author": "TheAirBlow",
+  "info": "Forge JSON made to work with Blowaunch",
   "mainClass": "net.minecraft.launchwrapper.Launch",
   "args": {
     "game": [
