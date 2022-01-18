@@ -28,7 +28,7 @@ namespace Blowaunch.Library
                 Size = pair.Value.Size, 
                 Url = new StringBuilder()
                     .AppendFormat(Fetcher.MojangEndpoints.Asset, 
-                        pair.Value.ShaHash).ToString()
+                        pair.Value.ShaHash.Substring(0, 2), pair.Value.ShaHash).ToString()
             }).ToArray();
             return json;
         }

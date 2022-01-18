@@ -24,7 +24,7 @@ namespace Blowaunch.ConsoleApp
                 Auth = new Runner.Configuration.AuthClass {
                     Type = Runner.Configuration.AuthClass.AuthType.None
                 },
-                RamMax = "1GB"
+                RamMax = "1024m"
             }, logger);
             var proc = new Process();
             proc.StartInfo = new ProcessStartInfo {
@@ -33,15 +33,13 @@ namespace Blowaunch.ConsoleApp
                 RedirectStandardOutput = true,
                 RedirectStandardError = true
             };
+            proc.OutputDataReceived += (_, e) => {
+                Console.WriteLine(e.Data);
+            };
             proc.Start();
-            while (!proc.HasExited) {
-                if (!proc.StandardOutput.EndOfStream)
-                    Console.Write(proc.StandardOutput.ReadLine());
-                if (!proc.StandardError.EndOfStream)
-                    Console.Write(proc.StandardError.ReadLine());
-            }
-
-            Console.WriteLine("Press any key to close...");
+            proc.BeginOutputReadLine();
+            proc.WaitForExit();
+            Console.WriteLine("\nPress any key to close...");
             Console.ReadKey();
         }
     }

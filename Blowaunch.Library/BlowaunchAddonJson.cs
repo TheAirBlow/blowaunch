@@ -49,37 +49,80 @@ namespace Blowaunch.Library
             
             var libraries = new List<BlowaunchMainJson.JsonLibrary>();
             foreach (var lib in mojang.Libraries) {
-                var main = new BlowaunchMainJson.JsonLibrary();
                 var split = lib.Name.Split(':');
-                main.Package = split[0];
-                main.Name = split[1];
-                main.Version = split[2];
-                main.Platform = "any";
-                main.Size = lib.Downloads.Artifact.Size;
-                main.ShaHash = lib.Downloads.Artifact.ShaHash;
-                main.Url = lib.Downloads.Artifact.Url;
+                var main = new BlowaunchMainJson.JsonLibrary {
+                    Allow = Array.Empty<string>(),
+                    Disallow = Array.Empty<string>(),
+                    Package = split[0],
+                    Name = split[1],
+                    Version = split[2],
+                    Platform = "any",
+                    Size = lib.Downloads.Artifact.Size,
+                    ShaHash = lib.Downloads.Artifact.ShaHash,
+                    Url = lib.Downloads.Artifact.Url
+                };
+                
                 libraries.Add(main);
-                if (lib.Natives != null) {
-                    var clone = main;
+                if (lib.Downloads.Classifiers != null) {
                     if (lib.Downloads.Classifiers.NativeLinux != null) {
-                        clone.Size = lib.Downloads.Classifiers.NativeLinux.Size;
-                        clone.ShaHash = lib.Downloads.Classifiers.NativeLinux.ShaHash;
-                        clone.Url = lib.Downloads.Classifiers.NativeLinux.Url;
-                    } else if (lib.Downloads.Classifiers.NativeWindows != null) {
-                        clone.Size = lib.Downloads.Classifiers.NativeWindows.Size;
-                        clone.ShaHash = lib.Downloads.Classifiers.NativeWindows.ShaHash;
-                        clone.Url = lib.Downloads.Classifiers.NativeWindows.Url;
-                    } else if (lib.Downloads.Classifiers.NativeMacOs != null) {
-                        clone.Size = lib.Downloads.Classifiers.NativeMacOs.Size;
-                        clone.ShaHash = lib.Downloads.Classifiers.NativeMacOs.ShaHash;
-                        clone.Url = lib.Downloads.Classifiers.NativeMacOs.Url;
-                    } else if (lib.Downloads.Classifiers.NativeOsx != null) {
-                        clone.Size = lib.Downloads.Classifiers.NativeOsx.Size;
-                        clone.ShaHash = lib.Downloads.Classifiers.NativeOsx.ShaHash;
-                        clone.Url = lib.Downloads.Classifiers.NativeOsx.Url;
+                        var newlib = new BlowaunchMainJson.JsonLibrary {
+                            Allow = Array.Empty<string>(),
+                            Disallow = Array.Empty<string>(),
+                            Package = split[0],
+                            Name = split[1],
+                            Version = split[2],
+                            Platform = "linux",
+                            Size = lib.Downloads.Classifiers.NativeLinux.Size,
+                            ShaHash = lib.Downloads.Classifiers.NativeLinux.ShaHash,
+                            Url = lib.Downloads.Classifiers.NativeLinux.Url
+                        };
+                        libraries.Add(newlib);
+                    } 
+                    
+                    if (lib.Downloads.Classifiers.NativeWindows != null) {
+                        var newlib = new BlowaunchMainJson.JsonLibrary {
+                            Allow = Array.Empty<string>(),
+                            Disallow = Array.Empty<string>(),
+                            Package = split[0],
+                            Name = split[1],
+                            Version = split[2],
+                            Platform = "windows",
+                            Size = lib.Downloads.Classifiers.NativeWindows.Size,
+                            ShaHash = lib.Downloads.Classifiers.NativeWindows.ShaHash,
+                            Url = lib.Downloads.Classifiers.NativeWindows.Url
+                        };
+                        libraries.Add(newlib);
                     }
                     
-                    libraries.Add(clone);
+                    if (lib.Downloads.Classifiers.NativeMacOs != null) {
+                        var newlib = new BlowaunchMainJson.JsonLibrary {
+                            Allow = Array.Empty<string>(),
+                            Disallow = Array.Empty<string>(),
+                            Package = split[0],
+                            Name = split[1],
+                            Version = split[2],
+                            Platform = "macos",
+                            Size = lib.Downloads.Classifiers.NativeMacOs.Size,
+                            ShaHash = lib.Downloads.Classifiers.NativeMacOs.ShaHash,
+                            Url = lib.Downloads.Classifiers.NativeMacOs.Url
+                        };
+                        libraries.Add(newlib);
+                    } 
+                    
+                    if (lib.Downloads.Classifiers.NativeOsx != null) {
+                        var newlib = new BlowaunchMainJson.JsonLibrary {
+                            Allow = Array.Empty<string>(),
+                            Disallow = Array.Empty<string>(),
+                            Package = split[0],
+                            Name = split[1],
+                            Version = split[2],
+                            Platform = "osx",
+                            Size = lib.Downloads.Classifiers.NativeOsx.Size,
+                            ShaHash = lib.Downloads.Classifiers.NativeOsx.ShaHash,
+                            Url = lib.Downloads.Classifiers.NativeOsx.Url
+                        };
+                        libraries.Add(newlib);
+                    }
                 }
             }
 

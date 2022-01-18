@@ -11,7 +11,7 @@ namespace Blowaunch.Library
                 "https://libraries.minecraft.net/{0}/{1}/{2}/{1}-{2}{3}.jar";
             public const string LibraryHash =
                 "https://libraries.minecraft.net/{0}/{1}/{2}/{1}-{2}{3}.sha1";
-            public const string Asset = "http://resources.download.minecraft.net/{0,-38}/{0}";
+            public const string Asset = "http://resources.download.minecraft.net/{0}/{1}";
         }
 
         public static class FabricEndpoints

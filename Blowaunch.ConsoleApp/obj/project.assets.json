@@ -177,19 +177,19 @@
     ]
   },
   "packageFolders": {
-    "/home/theairblow/.nuget/packages/": {}
+    "C:\\Users\\TheAirBlow\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/theairblow/RiderProjects/blowaunch/Blowaunch.ConsoleApp/Blowaunch.ConsoleApp.csproj",
+      "projectUniqueName": "C:\\Users\\TheAirBlow\\Desktop\\blowaunch\\Blowaunch.ConsoleApp\\Blowaunch.ConsoleApp.csproj",
       "projectName": "Blowaunch.ConsoleApp",
-      "projectPath": "/home/theairblow/RiderProjects/blowaunch/Blowaunch.ConsoleApp/Blowaunch.ConsoleApp.csproj",
-      "packagesPath": "/home/theairblow/.nuget/packages/",
-      "outputPath": "/home/theairblow/RiderProjects/blowaunch/Blowaunch.ConsoleApp/obj/",
+      "projectPath": "C:\\Users\\TheAirBlow\\Desktop\\blowaunch\\Blowaunch.ConsoleApp\\Blowaunch.ConsoleApp.csproj",
+      "packagesPath": "C:\\Users\\TheAirBlow\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\TheAirBlow\\Desktop\\blowaunch\\Blowaunch.ConsoleApp\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/home/theairblow/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\TheAirBlow\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net5.0"
@@ -201,8 +201,8 @@
         "net5.0": {
           "targetAlias": "net5.0",
           "projectReferences": {
-            "/home/theairblow/RiderProjects/blowaunch/Blowaunch.Library/Blowaunch.Library.csproj": {
-              "projectPath": "/home/theairblow/RiderProjects/blowaunch/Blowaunch.Library/Blowaunch.Library.csproj"
+            "C:\\Users\\TheAirBlow\\Desktop\\blowaunch\\Blowaunch.Library\\Blowaunch.Library.csproj": {
+              "projectPath": "C:\\Users\\TheAirBlow\\Desktop\\blowaunch\\Blowaunch.Library\\Blowaunch.Library.csproj"
             }
           }
         }
@@ -248,6 +248,18 @@
           {
             "name": "Microsoft.AspNetCore.App.Ref",
             "version": "[5.0.0, 5.0.0]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Host.win-x64",
+            "version": "[5.0.13, 5.0.13]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Ref",
+            "version": "[5.0.0, 5.0.0]"
+          },
+          {
+            "name": "Microsoft.WindowsDesktop.App.Ref",
+            "version": "[5.0.0, 5.0.0]"
           }
         ],
         "frameworkReferences": {
@@ -255,7 +267,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/5.0.402/RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Users\\TheAirBlow\\.dotnet\\sdk\\6.0.101\\RuntimeIdentifierGraph.json"
       }
     }
   }

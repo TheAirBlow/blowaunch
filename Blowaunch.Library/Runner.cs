@@ -1,7 +1,9 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using Blowaunch.Library.Downloader;
 using Newtonsoft.Json;
@@ -82,23 +84,24 @@ namespace Blowaunch.Library
 
                 if (process == false) continue;
                 if (arg.ValueList.Length != 0) {
-                    foreach (string str in arg.ValueList) sb.Append($"{ReplacerJava(main, str)} ");
+                    foreach (string str in arg.ValueList) sb.Append($"{ReplacerJava(main, str, config)} ");
                     continue;
                 }
 
-                sb.Append($"{ReplacerJava(main, arg.Value)} ");
+                sb.Append($"{ReplacerJava(main, arg.Value, config)} ");
             }
 
+            sb.Append($"{main.MainClass} ");
             foreach (BlowaunchMainJson.JsonArgument arg in main.Arguments.Game) {
                 bool process = true;
                 foreach (string str in arg.Disallow) {
-                    if (process == false) continue;
+                    if (process == false) break;
                     process = !CheckBool(config, str);
                 }
 
                 if (process == false) continue;
                 foreach (string str in arg.Allow) {
-                    if (process == false) continue;
+                    if (process == false) break;
                     process = CheckBool(config, str);
                 }
 
@@ -106,8 +109,8 @@ namespace Blowaunch.Library
                 if (arg.ValueList.Length != 0) {
                     foreach (string str in arg.ValueList) sb.Append($"{ReplacerGame(config, str, main)} ");
                     continue;
-                }
-
+                } 
+                
                 sb.Append($"{ReplacerGame(config, arg.Value, main)} ");
             }
 
@@ -119,16 +122,55 @@ namespace Blowaunch.Library
         /// Generates classpath string
         /// </summary>
         /// <param name="main">Blowaunch Main JSON</param>
+        /// <param name="config">Configuration class</param>
         /// <returns>Classpath string</returns>
-        private static string GenerateClasspath(BlowaunchMainJson main)
+        private static string GenerateClasspath(BlowaunchMainJson main, Configuration config)
         {
             var sb = new StringBuilder();
+            sb.Append($"\"{Path.Combine(FilesManager.Directories.VersionsRoot, main.Version, $"{main.Version}.jar")};");
             for (var index = 0; index < main.Libraries.Length; index++) {
-                BlowaunchMainJson.JsonLibrary lib = main.Libraries[index];
-                if (index == main.Libraries.Length - 1) sb.Append($"{FilesManager.GetLibraryPath(lib)}");
-                else sb.Append($"{FilesManager.GetLibraryPath(lib)}:");
-            }
+                var lib = main.Libraries[index];
+                if (lib.Extract) continue;
+                switch (lib.Platform) {
+                    case "windows":
+                        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                            continue;
+                        break;
+                    case "linux":
+                        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                            continue;
+                        break;
+                    case "macos":
+                        if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX) 
+                            && Environment.OSVersion.Version.Major < 10 || 
+                            Environment.OSVersion.Version.Minor < 12)
+                            continue;
+                        break;
+                    case "osx":
+                        if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX) 
+                            && Environment.OSVersion.Version.Major >= 10 || 
+                            Environment.OSVersion.Version.Minor >= 12)
+                            continue;
+                        break;
+                }
+                bool process = true;
+                foreach (string str in lib.Disallow) {
+                    if (process == false) break;
+                    process = !CheckBool(config, str);
+                }
 
+                if (process == false) continue;
+                foreach (string str in lib.Allow) {
+                    if (process == false) break;
+                    process = CheckBool(config, str);
+                }
+
+                if (process == false) continue;
+                sb.Append(index == main.Libraries.Length - 1
+                    ? FilesManager.GetLibraryPath(lib)
+                    : $"{FilesManager.GetLibraryPath(lib)};");
+            }
+            sb.Append("\"");
             return sb.ToString();
         }
 
@@ -137,12 +179,14 @@ namespace Blowaunch.Library
         /// </summary>
         /// <param name="main">Blowaunch Main JSON</param>
         /// <param name="str">String</param>
-        /// <returns></returns>
-        private static string ReplacerJava(BlowaunchMainJson main, string str)
+        /// <param name="config">Configuration class</param>
+        /// <returns>Processed string</returns>
+        private static string ReplacerJava(BlowaunchMainJson main, string str, Configuration config)
         {
-            return str.Replace("-Djava.library.path=${natives_directory}", "").Replace("${launcher_name}", "Blowaunch")
-                .Replace("${launcher_version}", Assembly.GetExecutingAssembly().GetName().FullName)
-                .Replace("${classpath}", GenerateClasspath(main));
+            return str.Replace("${natives_directory}", Path.Combine(FilesManager.Directories.VersionsRoot,
+                    main.Version, "natives")).Replace("${launcher_name}", "Blowaunch")
+                .Replace("${launcher_version}", Assembly.GetExecutingAssembly().GetName().Version!.ToString())
+                .Replace("${classpath}", GenerateClasspath(main, config));
         }
 
         /// <summary>
@@ -164,8 +208,7 @@ namespace Blowaunch.Library
                 newstr = newstr.Replace("${clientid}", "noauth").Replace("${auth_access_token}", "noauth")
                     .Replace("${user_type}", "noauth").Replace("${auth_xuid}", "noauth")
                     .Replace("${auth_uuid}", "noauth");
-            else
-            {
+            else {
                 newstr = newstr.Replace("${user_type}", config.Auth.Type.ToString().ToLower());
                 switch (config.Auth.Type) {
                     case Configuration.AuthClass.AuthType.Microsoft:

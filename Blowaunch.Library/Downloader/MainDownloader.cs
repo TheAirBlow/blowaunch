@@ -19,12 +19,12 @@ namespace Blowaunch.Library.Downloader
             FilesManager.InitializeDirectories();
             logger.Information("[Downloader] Downloading libraries...");
             foreach (BlowaunchMainJson.JsonLibrary lib in main.Libraries)
-                FilesManager.DownloadLibrary(lib, logger);
+                FilesManager.DownloadLibrary(lib, logger, main.Version);
             var assetsMojang = JsonConvert.DeserializeObject<MojangAssetsJson>(Fetcher.Fetch(main.Assets.Url));
             var assetsBlowaunch = BlowaunchAssetsJson.MojangToBlowaunch(assetsMojang);
             logger.Information("[Downloader] Saving assets index...");
-            File.WriteAllText(JsonConvert.SerializeObject(assetsMojang), 
-                Path.Combine(FilesManager.Directories.AssetsIndexes, $"{main.Assets.Id}.json"));
+            File.WriteAllText(Path.Combine(FilesManager.Directories.AssetsIndexes, $"{main.Assets.Id}.json"),
+                JsonConvert.SerializeObject(assetsMojang));
             logger.Information("[Downloader] Downloading assets...");
             foreach (BlowaunchAssetsJson.JsonAsset asset in assetsBlowaunch.Assets)
                 FilesManager.DownloadAsset(asset, logger);

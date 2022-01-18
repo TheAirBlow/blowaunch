@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Serilog.Core;
 
 namespace Blowaunch.Library
 {
@@ -21,34 +24,49 @@ namespace Blowaunch.Library
         [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
         private static BlowaunchMainJson ProcessLibraries(BlowaunchMainJson json)
         {
-            foreach (JsonLibrary lib in json.Libraries) {
+            var toDelete = new List<JsonLibrary>();
+            foreach (var lib in json.Libraries) {
+                /* Seems to cause problems
                 if (lib.Url == null) {
-                    lib.Url = lib.Platform == "any" ? new StringBuilder().AppendFormat(Fetcher.MojangEndpoints.Library, string.Join("\\", lib.Package.Split('.')), 
-                            lib.Name, lib.Version, string.Empty).ToString()
-                        : new StringBuilder().AppendFormat(Fetcher.MojangEndpoints.Library, lib.Package, lib.Name, lib.Version, $"-natives-{lib.Platform}").ToString();
-                } else if (lib.Url.Contains("maven")) {
-                    lib.Url = lib.Platform == "any" ? new StringBuilder().AppendFormat(lib.Url, string.Join("\\", lib.Package.Split('.')), 
-                            lib.Name, lib.Version, string.Empty).ToString()
-                        : new StringBuilder().AppendFormat(Fetcher.MojangEndpoints.Library, lib.Package, lib.Name, lib.Version, $"-natives-{lib.Platform}").ToString();
+                    lib.Url = lib.Platform == "any" ? new StringBuilder().AppendFormat(Fetcher.MojangEndpoints.Library, string.Join("/", 
+                                lib.Package.Split('.')), lib.Name, lib.Version, string.Empty).ToString()
+                        : new StringBuilder().AppendFormat(Fetcher.MojangEndpoints.Library, string.Join("/", 
+                                lib.Package.Split('.')), lib.Name, lib.Version, $"-natives-{lib.Platform}").ToString();
+                }*/
+
+                if (lib.Url == null) {
+                    toDelete.Add(lib);
+                    continue;
                 }
 
-                lib.ShaHash ??= Fetcher.Fetch(lib.Url.Replace(".jar", ".sha1"));
+                if (lib.Url.Contains("maven")) {
+                    lib.Url = lib.Platform == "any" ? new StringBuilder().AppendFormat(lib.Url, string.Join("/", lib.Package.Split('.')), 
+                            lib.Name, lib.Version, string.Empty).ToString()
+                        : new StringBuilder().AppendFormat(Fetcher.MojangEndpoints.Library, string.Join("/", 
+                                lib.Package.Split('.')), lib.Name, lib.Version, $"-natives-{lib.Platform}").ToString();
+                }
+                
+                lib.ShaHash ??= Fetcher.Fetch($"{lib.Url}.sha1");
             }
+
+            var result = json.Libraries.ToList();
+            foreach (var i in toDelete) result.Remove(i);
+            json.Libraries = result.ToArray();
             return json;
         }
         
         /// <summary>
         /// Converts Blowaunch -> Mojang
         /// </summary>
-        /// <param name="mojang"></param>
-        /// <returns></returns>
+        /// <param name="mojang">Mojang JSON</param>
+        /// <returns>Blowaunch JSON</returns>
         public static BlowaunchMainJson MojangToBlowaunch(MojangMainJson mojang)
         {
             var json = new BlowaunchMainJson {
                 MainClass = mojang.MainClass,
                 Type = mojang.Type,
-                Author = "TheAirBlow",
-                Information = "Blowaunch -> Mojang",
+                Author = "Mojang",
+                Information = "Official unmodified Minecraft version",
                 JavaMajor = mojang.JavaVersion.Major,
                 Arguments = new JsonArguments(),
                 Downloads = new JsonDownloads {
@@ -58,125 +76,442 @@ namespace Blowaunch.Library
                     ServerMappings = mojang.Downloads.ServerMappings,
                 },
                 Logging = new JsonLogging {
-                    Argument = mojang.Logging.Argument,
-                    Download = mojang.Logging.Download
+                    Argument = mojang.Logging.Client.Argument,
+                    Download = mojang.Logging.Client.Download
                 },
-                Assets = new JsonAssets(),
-                Version = mojang.Version
+                Assets = new JsonAssets {
+                    Id = mojang.Assets.Id,
+                    AssetsSize = mojang.Assets.AssetsSize,
+                    ShaHash = mojang.Assets.ShaHash,
+                    Size = mojang.Assets.Size,
+                    Url = mojang.Assets.Url
+                },
+                Version = mojang.Version,
+                Legacy = false
             };
             var gameArguments = new List<JsonArgument>();
             var jvmArguments = new List<JsonArgument>();
             foreach (var obj in mojang.Arguments.Game) {
-                var arg = new JsonArgument();
-                try {
-                    var nonstring = JsonConvert.DeserializeObject<MojangMainJson.JsonNonStringArgument>((string) obj);
-                    if (nonstring == null) {
-                        arg.Value = (string) obj;
-                        gameArguments.Add(arg);
-                        continue;
-                    }
-                    
-                    var collection = JsonConvert.DeserializeObject<List<string>>((string) obj);
-                    if (collection == null) arg.Value = (string) nonstring.Value;
-                    else arg.ValueList = collection.ToArray();
+                var arg = new JsonArgument {
+                    Allow = Array.Empty<string>(),
+                    Disallow = Array.Empty<string>(),
+                    ValueList = Array.Empty<string>(),
+                    Value = ""
+                };
+                if (obj is JObject a) {
+                    var nonstring = JsonConvert.DeserializeObject<MojangMainJson.JsonNonStringArgument>(a.ToString());
+                    if (nonstring.Value is JArray o) {
+                        var collection = JsonConvert.DeserializeObject<string[]>(o.ToString());
+                        if (collection != null) arg.ValueList = collection;
+                    } else arg.Value = (string) nonstring.Value;
                     var list1 = new List<string>();
                     var list2 = new List<string>();
                     foreach (var rule in nonstring.Rules) {
                         switch (rule.Action) {
-                            case MojangMainJson.JsonAction.Allow:
-                                foreach (var pair in rule.Features)
-                                    list1.Add(pair.Key);
+                            case MojangMainJson.JsonAction.allow:
+                                if (rule.Os != null) {
+                                    if (rule.Os.Name != null)
+                                        list1.Add($"os-name:{rule.Os.Name}");
+                                    if (rule.Os.Version != null)
+                                        list1.Add($"os-version:{rule.Os.Version}");
+                                }
+                                if (rule.Features != null)
+                                    foreach (var pair in rule.Features)
+                                        list1.Add(pair.Key);
                                 break;
-                            case MojangMainJson.JsonAction.Disallow:
-                                foreach (var pair in rule.Features)
-                                    list2.Add(pair.Key);
+                            case MojangMainJson.JsonAction.disallow:
+                                if (rule.Os != null) {
+                                    if (rule.Os.Name != null)
+                                        list2.Add($"os-name:{rule.Os.Name}");
+                                    if (rule.Os.Version != null)
+                                        list2.Add($"os-version:{rule.Os.Version}");
+                                }
+                                if (rule.Features != null)
+                                    foreach (var pair in rule.Features)
+                                        list2.Add(pair.Key);
                                 break;
                         }
                     }
                     arg.Allow = list1.ToArray();
                     arg.Disallow = list2.ToArray();
-                    gameArguments.Add(arg);
-                } catch { /* Ignore */ }
+                } else arg.Value = (string)obj;
+                gameArguments.Add(arg);
             }
             
-            foreach (var obj in mojang.Arguments.Java)
-            {
-                var arg = new JsonArgument();
-                try {
-                    var nonstring = JsonConvert.DeserializeObject<MojangMainJson.JsonNonStringArgument>((string) obj);
-                    if (nonstring == null) {
-                        arg.Value = (string) obj;
-                        jvmArguments.Add(arg);
-                        continue;
-                    }
-
-                    var collection = JsonConvert.DeserializeObject<List<string>>((string) obj);
-                    if (collection == null) arg.Value = (string) nonstring.Value;
-                    else arg.ValueList = collection.ToArray();
+            foreach (var obj in mojang.Arguments.Java) {
+                var arg = new JsonArgument {
+                    Allow = Array.Empty<string>(),
+                    Disallow = Array.Empty<string>(),
+                    ValueList = Array.Empty<string>(),
+                    Value = ""
+                };
+                if (obj is JObject a) {
+                    var nonstring = JsonConvert.DeserializeObject<MojangMainJson.JsonNonStringArgument>(a.ToString());
+                    if (nonstring.Value is JArray o) {
+                        var collection = JsonConvert.DeserializeObject<string[]>(o.ToString());
+                        if (collection != null) arg.ValueList = collection;
+                    } else arg.Value = (string) nonstring.Value;
                     var list1 = new List<string>();
                     var list2 = new List<string>();
                     foreach (var rule in nonstring.Rules) {
                         switch (rule.Action) {
-                            case MojangMainJson.JsonAction.Allow:
-                                foreach (var pair in rule.Features)
-                                    list1.Add(pair.Key);
-                                if (!string.IsNullOrEmpty(rule.Os.Name))
-                                    list1.Add($"os-name:{rule.Os.Name}");
-                                if (!string.IsNullOrEmpty(rule.Os.Version))
-                                    list1.Add($"os-version:{rule.Os.Version}");
+                            case MojangMainJson.JsonAction.allow:
+                                if (rule.Os != null) {
+                                    if (rule.Os.Name != null)
+                                        list1.Add($"os-name:{rule.Os.Name}");
+                                    if (rule.Os.Version != null)
+                                        list1.Add($"os-version:{rule.Os.Version}");
+                                }
+                                if (rule.Features != null)
+                                    foreach (var pair in rule.Features)
+                                        list1.Add(pair.Key);
                                 break;
-                            case MojangMainJson.JsonAction.Disallow:
-                                foreach (var pair in rule.Features)
-                                    list2.Add(pair.Key);
-                                if (!string.IsNullOrEmpty(rule.Os.Name))
-                                    list2.Add($"os-name:{rule.Os.Name}");
-                                if (!string.IsNullOrEmpty(rule.Os.Version))
-                                    list2.Add($"os-version:{rule.Os.Version}");
+                            case MojangMainJson.JsonAction.disallow:
+                                if (rule.Os != null) {
+                                    if (rule.Os.Name != null)
+                                        list2.Add($"os-name:{rule.Os.Name}");
+                                    if (rule.Os.Version != null)
+                                        list2.Add($"os-version:{rule.Os.Version}");
+                                }
+                                if (rule.Features != null)
+                                    foreach (var pair in rule.Features)
+                                        list2.Add(pair.Key);
                                 break;
                         }
                     }
                     arg.Allow = list1.ToArray();
                     arg.Disallow = list2.ToArray();
-                    jvmArguments.Add(arg);
-                } catch { /* Ignore */ }
+                } else arg.Value = (string)obj;
+                jvmArguments.Add(arg);
+            }
+
+            void ProcessLibraryRules(JsonLibrary lib, MojangMainJson.JsonLibrary lib2) {
+                if (lib2.Rules == null) return;
+                var list1 = new List<string>();
+                var list2 = new List<string>();
+                foreach (var rule in lib2.Rules) {
+                    switch (rule.Action) {
+                        case MojangMainJson.JsonAction.allow:
+                            if (rule.Os != null) {
+                                if (rule.Os.Name != null)
+                                    list1.Add($"os-name:{rule.Os.Name}");
+                                if (rule.Os.Version != null)
+                                    list1.Add($"os-version:{rule.Os.Version}");
+                            }
+                            break;
+                        case MojangMainJson.JsonAction.disallow:
+                            if (rule.Os != null) {
+                                if (rule.Os.Name != null)
+                                    list2.Add($"os-name:{rule.Os.Name}");
+                                if (rule.Os.Version != null)
+                                    list2.Add($"os-version:{rule.Os.Version}");
+                            }
+                            break;
+                    }
+                }
+                lib.Allow = list1.ToArray();
+                lib.Disallow = list2.ToArray();
             }
 
             json.Arguments.Game = gameArguments.ToArray();
             json.Arguments.Java = jvmArguments.ToArray();
             var libraries = new List<JsonLibrary>();
-            foreach (var lib in mojang.Libraries)
-            {
-                var main = new JsonLibrary();
-                string[] split = lib.Name.Split(':');
-                main.Package = split[0];
-                main.Name = split[1];
-                main.Version = split[2];
-                main.Platform = "any";
-                main.Size = lib.Downloads.Artifact.Size;
-                main.ShaHash = lib.Downloads.Artifact.ShaHash;
-                main.Url = lib.Downloads.Artifact.Url;
+            foreach (var lib in mojang.Libraries) {
+                var split = lib.Name.Split(':');
+                var main = new JsonLibrary {
+                    Allow = Array.Empty<string>(),
+                    Disallow = Array.Empty<string>(),
+                    Package = split[0],
+                    Name = split[1],
+                    Version = split[2],
+                    Platform = "any",
+                    Size = lib.Downloads.Artifact.Size,
+                    ShaHash = lib.Downloads.Artifact.ShaHash,
+                    Url = lib.Downloads.Artifact.Url,
+                    Exclude = Array.Empty<string>(),
+                    Extract = false
+                };
+                
+                ProcessLibraryRules(main, lib);
                 libraries.Add(main);
-                if (lib.Natives != null) {
-                    var clone = main;
+                if (lib.Downloads.Classifiers != null) {
                     if (lib.Downloads.Classifiers.NativeLinux != null) {
-                        clone.Size = lib.Downloads.Classifiers.NativeLinux.Size;
-                        clone.ShaHash = lib.Downloads.Classifiers.NativeLinux.ShaHash;
-                        clone.Url = lib.Downloads.Classifiers.NativeLinux.Url;
-                    } else if (lib.Downloads.Classifiers.NativeWindows != null) {
-                        clone.Size = lib.Downloads.Classifiers.NativeWindows.Size;
-                        clone.ShaHash = lib.Downloads.Classifiers.NativeWindows.ShaHash;
-                        clone.Url = lib.Downloads.Classifiers.NativeWindows.Url;
-                    } else if (lib.Downloads.Classifiers.NativeMacOs != null) {
-                        clone.Size = lib.Downloads.Classifiers.NativeMacOs.Size;
-                        clone.ShaHash = lib.Downloads.Classifiers.NativeMacOs.ShaHash;
-                        clone.Url = lib.Downloads.Classifiers.NativeMacOs.Url;
-                    } else if (lib.Downloads.Classifiers.NativeOsx != null) {
-                        clone.Size = lib.Downloads.Classifiers.NativeOsx.Size;
-                        clone.ShaHash = lib.Downloads.Classifiers.NativeOsx.ShaHash;
-                        clone.Url = lib.Downloads.Classifiers.NativeOsx.Url;
+                        var newlib = new JsonLibrary {
+                            Allow = Array.Empty<string>(),
+                            Disallow = Array.Empty<string>(),
+                            Package = split[0],
+                            Name = split[1],
+                            Version = split[2],
+                            Platform = "linux",
+                            Size = lib.Downloads.Classifiers.NativeLinux.Size,
+                            ShaHash = lib.Downloads.Classifiers.NativeLinux.ShaHash,
+                            Url = lib.Downloads.Classifiers.NativeLinux.Url,
+                            Exclude = Array.Empty<string>(),
+                            Extract = false
+                        };
+                        ProcessLibraryRules(newlib, lib);
+                        libraries.Add(newlib);
+                    } 
+                    
+                    if (lib.Downloads.Classifiers.NativeWindows != null) {
+                        var newlib = new JsonLibrary {
+                            Allow = Array.Empty<string>(),
+                            Disallow = Array.Empty<string>(),
+                            Package = split[0],
+                            Name = split[1],
+                            Version = split[2],
+                            Platform = "windows",
+                            Size = lib.Downloads.Classifiers.NativeWindows.Size,
+                            ShaHash = lib.Downloads.Classifiers.NativeWindows.ShaHash,
+                            Url = lib.Downloads.Classifiers.NativeWindows.Url,
+                            Exclude = Array.Empty<string>(),
+                            Extract = false
+                        };
+                        ProcessLibraryRules(newlib, lib);
+                        libraries.Add(newlib);
                     }
                     
-                    libraries.Add(clone);
+                    if (lib.Downloads.Classifiers.NativeMacOs != null) {
+                        var newlib = new JsonLibrary {
+                            Allow = Array.Empty<string>(),
+                            Disallow = Array.Empty<string>(),
+                            Package = split[0],
+                            Name = split[1],
+                            Version = split[2],
+                            Platform = "macos",
+                            Size = lib.Downloads.Classifiers.NativeMacOs.Size,
+                            ShaHash = lib.Downloads.Classifiers.NativeMacOs.ShaHash,
+                            Url = lib.Downloads.Classifiers.NativeMacOs.Url,
+                            Exclude = Array.Empty<string>(),
+                            Extract = false
+                        };
+                        ProcessLibraryRules(newlib, lib);
+                        libraries.Add(newlib);
+                    } 
+                    
+                    if (lib.Downloads.Classifiers.NativeOsx != null) {
+                        var newlib = new JsonLibrary {
+                            Allow = Array.Empty<string>(),
+                            Disallow = Array.Empty<string>(),
+                            Package = split[0],
+                            Name = split[1],
+                            Version = split[2],
+                            Platform = "osx",
+                            Size = lib.Downloads.Classifiers.NativeOsx.Size,
+                            ShaHash = lib.Downloads.Classifiers.NativeOsx.ShaHash,
+                            Url = lib.Downloads.Classifiers.NativeOsx.Url,
+                            Exclude = Array.Empty<string>(),
+                            Extract = false
+                        };
+                        ProcessLibraryRules(newlib, lib);
+                        libraries.Add(newlib);
+                    }
+                }
+            }
+
+            json.Libraries = libraries.ToArray();
+            json = ProcessLibraries(json);
+            return json;
+        }
+        
+        /// <summary>
+        /// Converts Blowaunch -> Mojang
+        /// </summary>
+        /// <param name="mojang">Legacy Mojang JSON</param>
+        /// <returns>Blowaunch JSON</returns>
+        public static BlowaunchMainJson MojangToBlowaunch(MojangLegacyMainJson mojang)
+        {
+            var json = new BlowaunchMainJson {
+                MainClass = mojang.MainClass,
+                Type = mojang.Type,
+                Author = "Mojang",
+                Information = "Official unmodified Legacy Minecraft version",
+                JavaMajor = mojang.JavaVersion.Major,
+                Arguments = new JsonArguments {
+                    Java = new[] { new JsonArgument {
+                        Allow = Array.Empty<string>(),
+                        Disallow = Array.Empty<string>(),
+                        ValueList = Array.Empty<string>(),
+                        Value = "-cp"
+                    }, new JsonArgument {
+                        Allow = Array.Empty<string>(),
+                        Disallow = Array.Empty<string>(),
+                        ValueList = Array.Empty<string>(),
+                        Value = "${classpath}"
+                    }, new JsonArgument {
+                        Allow = Array.Empty<string>(),
+                        Disallow = Array.Empty<string>(),
+                        ValueList = Array.Empty<string>(),
+                        Value = "-Djava.library.path=${natives_directory}"
+                    }},
+                    Game = new[] { new JsonArgument {
+                        Allow = Array.Empty<string>(),
+                        Disallow = Array.Empty<string>(),
+                        ValueList = Array.Empty<string>(),
+                        Value = mojang.Arguments
+                    }}
+                },
+                Downloads = new JsonDownloads {
+                    Client = mojang.Downloads.Client,
+                    ClientMappings = mojang.Downloads.ClientMappings,
+                    Server = mojang.Downloads.Server,
+                    ServerMappings = mojang.Downloads.ServerMappings,
+                },
+                Logging = new JsonLogging {
+                    Argument = mojang.Logging.Client.Argument,
+                    Download = mojang.Logging.Client.Download
+                },
+                Assets = new JsonAssets {
+                    Id = mojang.Assets.Id,
+                    AssetsSize = mojang.Assets.AssetsSize,
+                    ShaHash = mojang.Assets.ShaHash,
+                    Size = mojang.Assets.Size,
+                    Url = mojang.Assets.Url
+                },
+                Version = mojang.Version,
+                Legacy = true
+            };
+
+            void ProcessLibraryRules(JsonLibrary lib, MojangLegacyMainJson.JsonLibrary lib2) {
+                if (lib2.Rules == null) return;
+                var list1 = new List<string>();
+                var list2 = new List<string>();
+                foreach (var rule in lib2.Rules) {
+                    switch (rule.Action) {
+                        case MojangLegacyMainJson.JsonAction.allow:
+                            if (rule.Os != null) {
+                                if (rule.Os.Name != null)
+                                    list1.Add($"os-name:{rule.Os.Name}");
+                                if (rule.Os.Version != null)
+                                    list1.Add($"os-version:{rule.Os.Version}");
+                            }
+                            break;
+                        case MojangLegacyMainJson.JsonAction.disallow:
+                            if (rule.Os != null) {
+                                if (rule.Os.Name != null)
+                                    list2.Add($"os-name:{rule.Os.Name}");
+                                if (rule.Os.Version != null)
+                                    list2.Add($"os-version:{rule.Os.Version}");
+                            }
+                            break;
+                    }
+                }
+                lib.Allow = list1.ToArray();
+                lib.Disallow = list2.ToArray();
+            }
+            
+            var libraries = new List<JsonLibrary>();
+            foreach (var lib in mojang.Libraries) {
+                var split = lib.Name.Split(':');
+                var main = new JsonLibrary {
+                    Allow = Array.Empty<string>(),
+                    Disallow = Array.Empty<string>(),
+                    Package = split[0],
+                    Name = split[1],
+                    Version = split[2],
+                    Platform = "any",
+                    Exclude = Array.Empty<string>(),
+                    Extract = false
+                };
+
+                if (lib.Downloads.Artifact != null) {
+                    main.Size = lib.Downloads.Artifact.Size;
+                    main.ShaHash = lib.Downloads.Artifact.ShaHash;
+                    main.Url = lib.Downloads.Artifact.Url;
+                }
+                
+                ProcessLibraryRules(main, lib);
+                libraries.Add(main);
+                if (lib.Downloads.Classifiers != null) {
+                    if (lib.Downloads.Classifiers.NativeLinux != null) {
+                        var newlib = new JsonLibrary {
+                            Allow = Array.Empty<string>(),
+                            Disallow = Array.Empty<string>(),
+                            Package = split[0],
+                            Name = split[1],
+                            Version = split[2],
+                            Platform = "linux",
+                            Size = lib.Downloads.Classifiers.NativeLinux.Size,
+                            ShaHash = lib.Downloads.Classifiers.NativeLinux.ShaHash,
+                            Url = lib.Downloads.Classifiers.NativeLinux.Url
+                        };
+
+                        if (lib.Extract != null) {
+                            newlib.Exclude = lib.Extract.Exclude;
+                            newlib.Extract = true;
+                        }
+                        ProcessLibraryRules(newlib, lib);
+                        libraries.Add(newlib);
+                    } 
+                    
+                    if (lib.Downloads.Classifiers.NativeWindows != null) {
+                        var newlib = new JsonLibrary {
+                            Allow = Array.Empty<string>(),
+                            Disallow = Array.Empty<string>(),
+                            Package = split[0],
+                            Name = split[1],
+                            Version = split[2],
+                            Platform = "windows",
+                            Size = lib.Downloads.Classifiers.NativeWindows.Size,
+                            ShaHash = lib.Downloads.Classifiers.NativeWindows.ShaHash,
+                            Url = lib.Downloads.Classifiers.NativeWindows.Url,
+                            Exclude = Array.Empty<string>(),
+                            Extract = false
+                        };
+                        
+                        if (lib.Extract != null) {
+                            newlib.Exclude = lib.Extract.Exclude;
+                            newlib.Extract = true;
+                        }
+                        ProcessLibraryRules(newlib, lib);
+                        libraries.Add(newlib);
+                    }
+                    
+                    if (lib.Downloads.Classifiers.NativeMacOs != null) {
+                        var newlib = new JsonLibrary {
+                            Allow = Array.Empty<string>(),
+                            Disallow = Array.Empty<string>(),
+                            Package = split[0],
+                            Name = split[1],
+                            Version = split[2],
+                            Platform = "macos",
+                            Size = lib.Downloads.Classifiers.NativeMacOs.Size,
+                            ShaHash = lib.Downloads.Classifiers.NativeMacOs.ShaHash,
+                            Url = lib.Downloads.Classifiers.NativeMacOs.Url,
+                            Exclude = Array.Empty<string>(),
+                            Extract = false
+                        };
+                        
+                        if (lib.Extract != null) {
+                            newlib.Exclude = lib.Extract.Exclude;
+                            newlib.Extract = true;
+                        }
+                        ProcessLibraryRules(newlib, lib);
+                        libraries.Add(newlib);
+                    } 
+                    
+                    if (lib.Downloads.Classifiers.NativeOsx != null) {
+                        var newlib = new JsonLibrary {
+                            Allow = Array.Empty<string>(),
+                            Disallow = Array.Empty<string>(),
+                            Package = split[0],
+                            Name = split[1],
+                            Version = split[2],
+                            Platform = "osx",
+                            Size = lib.Downloads.Classifiers.NativeOsx.Size,
+                            ShaHash = lib.Downloads.Classifiers.NativeOsx.ShaHash,
+                            Url = lib.Downloads.Classifiers.NativeOsx.Url,
+                            Exclude = Array.Empty<string>(),
+                            Extract = false
+                        };
+                        
+                        if (lib.Extract != null) {
+                            newlib.Exclude = lib.Extract.Exclude;
+                            newlib.Extract = true;
+                        }
+                        ProcessLibraryRules(newlib, lib);
+                        libraries.Add(newlib);
+                    }
                 }
             }
 
@@ -229,6 +564,10 @@ namespace Blowaunch.Library
             [JsonProperty("sha1")] public string ShaHash;
             [JsonProperty("size")] public int Size;
             [JsonProperty("url")] public string Url;
+            [JsonProperty("allow")] public string[] Allow;
+            [JsonProperty("disallow")] public string[] Disallow;
+            [JsonProperty("extract")] public bool Extract;
+            [JsonProperty("exclude")] public string[] Exclude;
         }
         
         /// <summary>
@@ -277,6 +616,7 @@ namespace Blowaunch.Library
         [JsonProperty("author")] public string Author;
         [JsonProperty("info")] public string Information;
         [JsonProperty("java")] public int JavaMajor;
+        [JsonProperty("legacy")] public bool Legacy;
         [JsonProperty("args")] public JsonArguments Arguments;
         [JsonProperty("assets")] public JsonAssets Assets;
         [JsonProperty("libraries")] public JsonLibrary[] Libraries;

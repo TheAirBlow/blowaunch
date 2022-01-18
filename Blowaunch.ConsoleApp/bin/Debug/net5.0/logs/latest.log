@@ -1,0 +1,11 @@
+[05:14:26] [Client thread/INFO]: Setting user: TheAirBlow
+[05:14:28] [Client thread/INFO]: LWJGL Version: 2.9.4
+[05:14:29] [Client thread/INFO]: Reloading ResourceManager: Default
+[05:14:30] [Sound Library Loader/INFO]: Starting up SoundSystem...
+[05:14:31] [Thread-2/INFO]: Initializing LWJGL OpenAL
+[05:14:31] [Thread-2/INFO]: (The LWJGL binding of OpenAL.  For more information, see http://www.lwjgl.org)
+[05:14:31] [Thread-2/INFO]: OpenAL initialized.
+[05:14:31] [Sound Library Loader/INFO]: Sound engine started
+[05:14:38] [Client thread/INFO]: Created: 1024x512 textures-atlas
+[05:14:42] [Client thread/INFO]: Narrator library for x64 successfully loaded
+[05:14:45] [Realms Notification Availability checker #1/INFO]: Could not authorize you against Realms server: Invalid session id

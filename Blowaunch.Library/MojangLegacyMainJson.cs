@@ -9,7 +9,7 @@ namespace Blowaunch.Library
     /// <summary>
     /// Mojang - Main JSON
     /// </summary>
-    public class MojangMainJson
+    public class MojangLegacyMainJson
     {
         /// <summary>
         /// Mojang Main JSON - Rule Action
@@ -29,24 +29,6 @@ namespace Blowaunch.Library
             [JsonProperty("action")] public JsonAction Action;
             [JsonProperty("features")] public Dictionary<string, bool> Features;
             [JsonProperty("os")] public JsonLibraryRuleOs Os;
-        }
-        
-        /// <summary>
-        /// Mojang Main JSON - Non-string Argument
-        /// </summary>
-        public class JsonNonStringArgument
-        {
-            [JsonProperty("value")] public object Value;
-            [JsonProperty("rules")] public JsonRule[] Rules;
-        }
-
-        /// <summary>
-        /// Mojang Main JSON - Arguments
-        /// </summary>
-        public class JsonArguments
-        {
-            [JsonProperty("game")] public object[] Game;
-            [JsonProperty("jvm")] public object[] Java;
         }
 
         /// <summary>
@@ -113,11 +95,20 @@ namespace Blowaunch.Library
         }
 
         /// <summary>
+        /// Mojang Main JSON - Extract JAR
+        /// </summary>
+        public class JsonExtract
+        {
+            [JsonProperty("exclude")] public string[] Exclude;
+        }
+
+        /// <summary>
         /// Mojang Main JSON - Library
         /// </summary>
         public class JsonLibrary
         {
             [JsonProperty("downloads")] public JsonLibraryDownloads Downloads;
+            [JsonProperty("extract")] public JsonExtract Extract;
             [JsonProperty("rules")] public JsonLibraryRule[] Rules;
             [JsonProperty("natives")] public Dictionary<string, string> Natives;
             [JsonProperty("name")] public string Name;
@@ -164,10 +155,23 @@ namespace Blowaunch.Library
         [JsonProperty("libraries")] public JsonLibrary[] Libraries;
         [JsonProperty("downloads")] public JsonDownloads Downloads;
         [JsonProperty("javaVersion")] public JsonJava JavaVersion;
-        [JsonProperty("arguments")] public JsonArguments Arguments;
+        [JsonProperty("minecraftArguments")] public string Arguments;
         [JsonProperty("assetIndex")] public JsonAssets Assets;
         [JsonProperty("logging")] public JsonLogging Logging;
         [JsonProperty("mainClass")] public string MainClass;
         [JsonProperty("id")] public string Version;
+
+        /// <summary>
+        /// Is a mojang JSON a legacy one?
+        /// </summary>
+        /// <param name="json">JSON string</param>
+        /// <returns>Boolean value</returns>
+        public static bool IsLegacyJson(string json)
+        {
+            try {
+                var main = JsonConvert.DeserializeObject<MojangLegacyMainJson>(json);
+                return main?.Arguments != null;
+            } catch { return false; }
+        }
     }
 }

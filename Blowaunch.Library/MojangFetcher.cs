@@ -29,8 +29,14 @@ namespace Blowaunch.Library
             var versionFetch = versions.Versions.FirstOrDefault(x => x.Id == ver);
             if (versionFetch == null)
                 throw new Exception("Unknown version!");
-            var versionMojang = JsonConvert.DeserializeObject<MojangMainJson>(Fetcher.Fetch(versionFetch.Url));
-            return BlowaunchMainJson.MojangToBlowaunch(versionMojang);
+            var content = Fetcher.Fetch(versionFetch.Url);
+            if (!MojangLegacyMainJson.IsLegacyJson(content)) {
+                var versionMojang = JsonConvert.DeserializeObject<MojangMainJson>(content);
+                return BlowaunchMainJson.MojangToBlowaunch(versionMojang);
+            } else {
+                var versionMojang = JsonConvert.DeserializeObject<MojangLegacyMainJson>(content);
+                return BlowaunchMainJson.MojangToBlowaunch(versionMojang);
+            }
         }
     }
 }
