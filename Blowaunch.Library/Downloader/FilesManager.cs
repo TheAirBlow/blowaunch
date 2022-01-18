@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using Serilog.Core;
+using Spectre.Console;
 
 namespace Blowaunch.Library.Downloader
 {
@@ -33,6 +34,8 @@ namespace Blowaunch.Library.Downloader
                 Path.Combine(Root, "libraries");
             public static readonly string VersionsRoot =
                 Path.Combine(Root, "versions");
+            public static readonly string JavaRoot =
+                Path.Combine(Root, "runtime");
         }
 
         /// <summary>
@@ -52,21 +55,21 @@ namespace Blowaunch.Library.Downloader
         /// Downloads an asset
         /// </summary>
         /// <param name="asset">Blowaunch Asset JSON</param>
-        /// /// <param name="logger">Serilog Logger</param>
-        public static void DownloadAsset(BlowaunchAssetsJson.JsonAsset asset, Logger logger)
+        /// <param name="online">Is in online mode</param>
+        public static void DownloadAsset(BlowaunchAssetsJson.JsonAsset asset, bool online)
         {
-            string path = Path.Combine(Directories.AssetsObject, asset.ShaHash.Substring(0, 2), asset.ShaHash);
+            var path = Path.Combine(Directories.AssetsObject, asset.ShaHash.Substring(0, 2), asset.ShaHash);
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-            if (File.Exists(path)) {
-                var hash = HashHelper.Hash(File.ReadAllBytes(path));
-                if (hash != asset.ShaHash) {
-                    logger.Warning($"[Assets] {asset.Name} hash mismatch: {hash} and {asset.ShaHash}, redownloading...");
+            if (!File.Exists(path) && online) Fetcher.Download(asset.Url, path);
+            
+            var hash = HashHelper.Hash(File.ReadAllBytes(path));
+            if (hash != asset.ShaHash) {
+                if (online) {
+                    AnsiConsole.MarkupLine($"[yellow]{asset.Name} hash mismatch: {hash} and {asset.ShaHash}, redownloading...[/]");
                     File.Delete(path);
-                    DownloadAsset(asset, logger);
-                } else logger.Information($"[Assets] {asset.Name} skipped, already exists and hash matches!");
-            } else {
-                Fetcher.Download(asset.Url, path);
-                logger.Information($"[Assets] {asset.Name} successfully downloaded!");
+                    DownloadAsset(asset, true);
+                } else AnsiConsole.MarkupLine($"[yellow]{asset.Name} hash mismatch: {hash} and {asset.ShaHash}, " +
+                                             $"can't redownload in offline mode![/]");
             }
         }
 
@@ -90,26 +93,26 @@ namespace Blowaunch.Library.Downloader
         /// Downloads a library
         /// </summary>
         /// <param name="library">Blowaunch Library JSON</param>
-        /// <param name="logger">Serilog Logger</param>
         /// <param name="version">Version</param>
+        /// <param name="online">Is in online mode</param>
         [SuppressMessage("ReSharper", "ConvertIfStatementToConditionalTernaryExpression")]
-        public static void DownloadLibrary(BlowaunchMainJson.JsonLibrary library, Logger logger, string version)
+        public static void DownloadLibrary(BlowaunchMainJson.JsonLibrary library, string version, bool online)
         {
             var path = GetLibraryPath(library);
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
             var debug = $"{library.Package}:{library.Name}:{library.Version}:{library.Platform}";
-            if (!File.Exists(path)) {
-                Fetcher.Download(library.Url, path);
-                logger.Information($"[Libraries] {debug} downloaded, performing a hash check...");
-            }
+            if (!File.Exists(path) && online) Fetcher.Download(library.Url, path);
             
             var hash = HashHelper.Hash(File.ReadAllBytes(path));  
             if (hash != library.ShaHash) {
-                logger.Warning($"[Libraries] {debug} hash mismatch: {hash} and {library.ShaHash}, redownloading...");
-                File.Delete(path);
-                DownloadLibrary(library, logger, version);
-            } else logger.Information($"[Libraries] {debug} hash check successful!");
-
+                if (online) {
+                    AnsiConsole.MarkupLine($"[yellow]{debug} hash mismatch: {hash} and {library.ShaHash}, redownloading...[/]");
+                    File.Delete(path);
+                    DownloadLibrary(library, version, true);
+                } else AnsiConsole.MarkupLine($"[yellow]{debug} hash mismatch: {hash} and {library.ShaHash}, " +
+                                              $"can't redownload in offline mode![/]");
+            }
+            
             if (library.Extract) {
                 var natives = Path.Combine(Directories.VersionsRoot, version, "natives");
                 if (!Directory.Exists(natives)) Directory.CreateDirectory(natives);
@@ -125,29 +128,33 @@ namespace Blowaunch.Library.Downloader
         /// Downloads client and all required files
         /// </summary>
         /// <param name="main">Blowaunch Main JSON</param>
-        /// <param name="logger">Serilog Logger</param>
-        public static void DownloadClient(BlowaunchMainJson main, Logger logger)
+        /// <param name="online">Is in online mode</param>
+        public static void DownloadClient(BlowaunchMainJson main, bool online)
         {
-            string path = Path.Combine(Directories.VersionsRoot, main.Version);
-            string version = Path.Combine(path, $"{main.Version}.jar");
-            string json = Path.Combine(path, $"{main.Version}.json");
-            string logging = Path.Combine(path, "logging.xml");
+            var path = Path.Combine(Directories.VersionsRoot, main.Version);
+            var version = Path.Combine(path, $"{main.Version}.jar");
+            var logging = Path.Combine(path, "logging.xml");
             Directory.CreateDirectory(path);
-            Fetcher.Download(main.Downloads.Client.Url, version);
-            Fetcher.Download(main.Logging.Download.Url, logging);
-            string hash1 = HashHelper.Hash(File.ReadAllBytes(version));
+            if (online) {
+                Fetcher.Download(main.Downloads.Client.Url, version);
+                Fetcher.Download(main.Logging.Download.Url, logging);
+            }
+            var hash1 = HashHelper.Hash(File.ReadAllBytes(version));
             if (hash1 != main.Downloads.Client.ShaHash) {
-                logger.Warning($"[Client] {version} hash mismatch: {hash1} and {main.Downloads.Client.ShaHash}, redownloading...");
-                DownloadClient(main, logger);
+                if (online) {
+                    AnsiConsole.MarkupLine($"[yellow]{version} hash mismatch: {hash1} and {main.Downloads.Client.ShaHash}, redownloading...[/]");
+                    DownloadClient(main, true);
+                } else AnsiConsole.MarkupLine($"[yellow]{version} hash mismatch: {hash1} and {main.Downloads.Client.ShaHash}, " +
+                                              $"can't redownload in offline mode![/]");
             }
-            string hash2 = HashHelper.Hash(File.ReadAllBytes(logging));
+            var hash2 = HashHelper.Hash(File.ReadAllBytes(logging));
             if (hash2 != main.Logging.Download.ShaHash) {
-                logger.Warning($"[Client] {logging} hash mismatch: {hash2} and {main.Logging.Download.ShaHash}, redownloading...");
-                DownloadClient(main, logger);
+                if (online) {
+                    AnsiConsole.MarkupLine($"[yellow]{logging} hash mismatch: {hash2} and {main.Logging.Download.ShaHash}, redownloading...[/]");
+                    DownloadClient(main, true);
+                } else AnsiConsole.MarkupLine($"[yellow]{logging} hash mismatch: {hash2} and {main.Logging.Download.ShaHash}, " +
+                                              $"can't redownload in offline mode![/]");
             }
-            
-            File.WriteAllText(json, JsonConvert.SerializeObject(main));
-            logger.Information($"[Client] {main.Version} successfully downloaded!");
         }
     }
 }

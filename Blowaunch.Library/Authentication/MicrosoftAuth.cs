@@ -113,8 +113,7 @@ namespace Blowaunch.Library.Authentication
             if (minecraftJson == null || string.IsNullOrEmpty(minecraftJson.AccessToken)) return false;
             config.Auth.Token = minecraftJson.AccessToken;
             config.Auth.Xuid = minecraftJson.Xuid;
-            if (config.Auth.Type != Runner.Configuration.AuthClass.AuthType.PretendMicrosoft)
-            {
+            if (config.Auth.Type != Runner.Configuration.AuthClass.AuthType.PretendMicrosoft) {
                 if (Fetcher.Fetch(new StringBuilder().AppendFormat(Endpoints.Microsoft.Ownership,
                     minecraftJson.AccessToken).ToString()) != "ownership-confirmed") return false;
                 // Exception here - Unexpected error

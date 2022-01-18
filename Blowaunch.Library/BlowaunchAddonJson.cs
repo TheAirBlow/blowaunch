@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 
@@ -19,17 +21,34 @@ namespace Blowaunch.Library
         [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
         private static BlowaunchAddonJson ProcessLibraries(BlowaunchAddonJson json)
         {
-            foreach (BlowaunchMainJson.JsonLibrary lib in json.Libraries) {
+            var toDelete = new List<BlowaunchMainJson.JsonLibrary>();
+            foreach (var lib in json.Libraries) {
+                /* Seems to cause problems
                 if (lib.Url == null) {
-                    lib.Url = lib.Platform == "any" ? new StringBuilder().AppendFormat(Fetcher.MojangEndpoints.Library, lib.Package, lib.Name, lib.Version, string.Empty).ToString()
-                        : new StringBuilder().AppendFormat(Fetcher.MojangEndpoints.Library, lib.Package, lib.Name, lib.Version, $"-natives-{lib.Platform}").ToString();
-                } else if (lib.Url.Contains("maven")) {
-                    lib.Url = lib.Platform == "any" ? new StringBuilder().AppendFormat(lib.Url, lib.Package, lib.Name, lib.Version, string.Empty).ToString()
-                        : new StringBuilder().AppendFormat(Fetcher.MojangEndpoints.Library, lib.Package, lib.Name, lib.Version, $"-natives-{lib.Platform}").ToString();
+                    lib.Url = lib.Platform == "any" ? new StringBuilder().AppendFormat(Fetcher.MojangEndpoints.Library, string.Join("/", 
+                                lib.Package.Split('.')), lib.Name, lib.Version, string.Empty).ToString()
+                        : new StringBuilder().AppendFormat(Fetcher.MojangEndpoints.Library, string.Join("/", 
+                                lib.Package.Split('.')), lib.Name, lib.Version, $"-natives-{lib.Platform}").ToString();
+                }*/
+
+                if (lib.Url == null) {
+                    toDelete.Add(lib);
+                    continue;
                 }
 
-                lib.ShaHash ??= Fetcher.Fetch(lib.Url.Replace(".jar", ".sha1"));
+                if (lib.Url.Contains("maven") && !lib.Url.EndsWith(".jar")) {
+                    lib.Url = lib.Platform == "any" ? $"{lib.Url}{string.Join("/", lib.Package.Split('.'))}/{lib.Name}/{lib.Version}/" +
+                                                      $"{lib.Name}-{lib.Version}.jar"
+                        : new StringBuilder().AppendFormat(Fetcher.MojangEndpoints.Library, string.Join("/", 
+                            lib.Package.Split('.')), lib.Name, lib.Version, $"-natives-{lib.Platform}").ToString();
+                }
+                
+                lib.ShaHash ??= Fetcher.Fetch($"{lib.Url}.sha1");
             }
+
+            var result = json.Libraries.ToList();
+            foreach (var i in toDelete) result.Remove(i);
+            json.Libraries = result.ToArray();
             return json;
         }
         
@@ -42,8 +61,8 @@ namespace Blowaunch.Library
         {
             var json = new BlowaunchAddonJson {
                 MainClass = mojang.MainClass,
-                Author = "TheAirBlow",
-                Information = "Blowaunch -> Mojang",
+                Author = "Mojang Studios",
+                Information = "Mojang JSON made to work with Blowaunch",
                 BaseVersion = mojang.Version
             };
             
@@ -125,7 +144,62 @@ namespace Blowaunch.Library
                     }
                 }
             }
+            
+            json.Libraries = libraries.ToArray();
+            json = ProcessLibraries(json);
+            return json;
+        }
+        
+        /// <summary>
+        /// Converts Blowaunch -> Fabric
+        /// </summary>
+        /// <param name="fabric">Fabric JSON</param>
+        /// <returns>Blowaunch JSON</returns>
+        public static BlowaunchAddonJson MojangToBlowaunch(FabricJson fabric)
+        {
+            var json = new BlowaunchAddonJson {
+                MainClass = fabric.MainClass,
+                Author = "FabricMC Contributors",
+                Information = "Fabric JSON made to work with Blowaunch",
+                BaseVersion = fabric.BaseVersion,
+            };
+            
+            var libraries = new List<BlowaunchMainJson.JsonLibrary>();
+            foreach (var lib in fabric.Libraries) {
+                var split = lib.Name.Split(':');
+                var main = new BlowaunchMainJson.JsonLibrary {
+                    Allow = Array.Empty<string>(),
+                    Disallow = Array.Empty<string>(),
+                    Package = split[0],
+                    Name = split[1],
+                    Version = split[2],
+                    Platform = "any",
+                    Url = lib.Url
+                };
+                
+                libraries.Add(main);
+            }
 
+            var game = new List<BlowaunchMainJson.JsonArgument>();
+            var java = new List<BlowaunchMainJson.JsonArgument>();
+            foreach (var i in fabric.Arguments.Game)
+                game.Add(new BlowaunchMainJson.JsonArgument {
+                    Allow = Array.Empty<string>(),
+                    Disallow = Array.Empty<string>(),
+                    ValueList = Array.Empty<string>(),
+                    Value = i
+                });
+            foreach (var i in fabric.Arguments.Java)
+                java.Add(new BlowaunchMainJson.JsonArgument {
+                    Allow = Array.Empty<string>(),
+                    Disallow = Array.Empty<string>(),
+                    ValueList = Array.Empty<string>(),
+                    Value = i
+                });
+            json.Arguments = new BlowaunchMainJson.JsonArguments {
+                Game = game.ToArray(),
+                Java = java.ToArray()
+            };
             json.Libraries = libraries.ToArray();
             json = ProcessLibraries(json);
             return json;
@@ -135,6 +209,7 @@ namespace Blowaunch.Library
         [JsonProperty("author")] public string Author;
         [JsonProperty("info")] public string Information;
         [JsonProperty("libraries")] public BlowaunchMainJson.JsonLibrary[] Libraries;
+        [JsonProperty("args")] public BlowaunchMainJson.JsonArguments Arguments;
         [JsonProperty("mainClass")] public string MainClass;
     }
 }

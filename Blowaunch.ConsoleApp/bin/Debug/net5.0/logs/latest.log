@@ -1,11 +1,78 @@
-[05:14:26] [Client thread/INFO]: Setting user: TheAirBlow
-[05:14:28] [Client thread/INFO]: LWJGL Version: 2.9.4
-[05:14:29] [Client thread/INFO]: Reloading ResourceManager: Default
-[05:14:30] [Sound Library Loader/INFO]: Starting up SoundSystem...
-[05:14:31] [Thread-2/INFO]: Initializing LWJGL OpenAL
-[05:14:31] [Thread-2/INFO]: (The LWJGL binding of OpenAL.  For more information, see http://www.lwjgl.org)
-[05:14:31] [Thread-2/INFO]: OpenAL initialized.
-[05:14:31] [Sound Library Loader/INFO]: Sound engine started
-[05:14:38] [Client thread/INFO]: Created: 1024x512 textures-atlas
-[05:14:42] [Client thread/INFO]: Narrator library for x64 successfully loaded
-[05:14:45] [Realms Notification Availability checker #1/INFO]: Could not authorize you against Realms server: Invalid session id
+[07:17:17] [main/INFO]: Loading tweak class name net.minecraftforge.fml.common.launcher.FMLTweaker
+[07:17:17] [main/INFO]: Using primary tweak class name net.minecraftforge.fml.common.launcher.FMLTweaker
+[07:17:17] [main/WARN]: Tweak class name net.minecraftforge.fml.common.launcher.FMLTweaker has already been visited -- skipping
+[07:17:17] [main/INFO]: Calling tweak class net.minecraftforge.fml.common.launcher.FMLTweaker
+[07:17:17] [main/INFO]: Forge Mod Loader version 14.23.5.2860 for Minecraft 1.12.2 loading
+[07:17:17] [main/INFO]: Java is OpenJDK Client VM, version 1.8.0_312, running on Windows 10:x86:10.0, installed at C:\Users\TheAirBlow\AppData\Roaming\.blowaunch\runtime\8
+[07:17:17] [main/INFO]: Searching C:\Users\TheAirBlow\AppData\Roaming\.blowaunch\mods for mods
+[07:17:17] [main/INFO]: Loading tweak class name net.minecraftforge.fml.common.launcher.FMLInjectionAndSortingTweaker
+[07:17:17] [main/INFO]: Loading tweak class name net.minecraftforge.fml.common.launcher.FMLDeobfTweaker
+[07:17:17] [main/INFO]: Calling tweak class net.minecraftforge.fml.common.launcher.FMLInjectionAndSortingTweaker
+[07:17:17] [main/INFO]: Calling tweak class net.minecraftforge.fml.common.launcher.FMLInjectionAndSortingTweaker
+[07:17:17] [main/INFO]: Calling tweak class net.minecraftforge.fml.relauncher.CoreModManager$FMLPluginWrapper
+[07:17:19] [main/INFO]: Found valid fingerprint for Minecraft Forge. Certificate fingerprint e3c3d50c7c986df74c645c0ac54639741c90a557
+[07:17:19] [main/INFO]: Found valid fingerprint for Minecraft. Certificate fingerprint cd99959656f753dc28d863b46769f7f8fbaefcfc
+[07:17:19] [main/INFO]: Calling tweak class net.minecraftforge.fml.relauncher.CoreModManager$FMLPluginWrapper
+[07:17:19] [main/INFO]: Calling tweak class net.minecraftforge.fml.common.launcher.FMLDeobfTweaker
+[07:17:19] [main/INFO]: Loading tweak class name net.minecraftforge.fml.common.launcher.TerminalTweaker
+[07:17:19] [main/INFO]: Calling tweak class net.minecraftforge.fml.common.launcher.TerminalTweaker
+[07:17:19] [main/INFO]: Launching wrapped minecraft {net.minecraft.client.main.Main}
+[07:17:20] [main/INFO]: [net.minecraft.client.main.Main:main:55]: Completely ignored arguments: [Forge, release, ]
+[07:17:20] [Client thread/INFO]: Setting user: TheAirBlow
+[07:17:24] [Client thread/INFO]: LWJGL Version: 2.9.4
+[07:17:25] [Client thread/INFO]: -- System Details --
+Details:
+	Minecraft Version: 1.12.2
+	Operating System: Windows 10 (x86) version 10.0
+	Java Version: 1.8.0_312, Temurin
+	Java VM Version: OpenJDK Client VM (mixed mode), Temurin
+	Memory: 852519928 bytes (813 MB) / 1037959168 bytes (989 MB) up to 1037959168 bytes (989 MB)
+	JVM Flags: 2 total; -Xms1024m -Xmx1024m
+	IntCache: cache: 0, tcache: 0, allocated: 0, tallocated: 0
+	FML: 
+	Loaded coremods (and transformers): 
+	GL info: ' Vendor: 'ATI Technologies Inc.' Version: '4.6.13596 Compatibility Profile Context 20.10.28 27.20.1028.1' Renderer: 'AMD Radeon(TM) Vega 3 Graphics'
+[07:17:25] [Client thread/INFO]: MinecraftForge v14.23.5.2860 Initialized
+[07:17:25] [Client thread/INFO]: Starts to replace vanilla recipe ingredients with ore ingredients.
+[07:17:25] [Client thread/INFO]: Invalid recipe found with multiple oredict ingredients in the same ingredient...
+[07:17:26] [Client thread/INFO]: Replaced 1227 ore ingredients
+[07:17:26] [Client thread/INFO]: Searching C:\Users\TheAirBlow\AppData\Roaming\.blowaunch\mods for mods
+[07:17:27] [Client thread/INFO]: Forge Mod Loader has identified 4 mods to load
+[07:17:27] [Client thread/INFO]: Attempting connection with missing mods [minecraft, mcp, FML, forge] at CLIENT
+[07:17:27] [Client thread/INFO]: Attempting connection with missing mods [minecraft, mcp, FML, forge] at SERVER
+[07:17:28] [Thread-3/INFO]: Using sync timing. 200 frames of Display.update took 114210591 nanos
+[07:17:28] [Client thread/INFO]: Reloading ResourceManager: Default, FMLFileResourcePack:Forge Mod Loader, FMLFileResourcePack:Minecraft Forge
+[07:17:28] [Client thread/INFO]: Processing ObjectHolder annotations
+[07:17:28] [Client thread/INFO]: Found 1168 ObjectHolder annotations
+[07:17:28] [Client thread/INFO]: Identifying ItemStackHolder annotations
+[07:17:28] [Client thread/INFO]: Found 0 ItemStackHolder annotations
+[07:17:28] [Client thread/INFO]: Configured a dormant chunk cache size of 0
+[07:17:28] [Forge Version Check/INFO]: [forge] Starting version check at http://files.minecraftforge.net/maven/net/minecraftforge/forge/promotions_slim.json
+[07:17:28] [Client thread/INFO]: Applying holder lookups
+[07:17:28] [Client thread/INFO]: Holder lookups applied
+[07:17:28] [Client thread/INFO]: Applying holder lookups
+[07:17:28] [Client thread/INFO]: Holder lookups applied
+[07:17:28] [Client thread/INFO]: Applying holder lookups
+[07:17:28] [Client thread/INFO]: Holder lookups applied
+[07:17:28] [Client thread/INFO]: Applying holder lookups
+[07:17:28] [Client thread/INFO]: Holder lookups applied
+[07:17:28] [Client thread/INFO]: Injecting itemstacks
+[07:17:28] [Client thread/INFO]: Itemstack injection complete
+[07:17:29] [Sound Library Loader/INFO]: Starting up SoundSystem...
+[07:17:30] [Thread-5/INFO]: Initializing LWJGL OpenAL
+[07:17:30] [Thread-5/INFO]: (The LWJGL binding of OpenAL.  For more information, see http://www.lwjgl.org)
+[07:17:30] [Thread-5/INFO]: OpenAL initialized.
+[07:17:30] [Sound Library Loader/INFO]: Sound engine started
+[07:17:31] [Forge Version Check/INFO]: [forge] Found status: AHEAD Target: null
+[07:17:34] [Client thread/INFO]: Max texture size: 8192
+[07:17:39] [Client thread/INFO]: Created: 512x512 textures-atlas
+[07:17:40] [Client thread/INFO]: Applying holder lookups
+[07:17:40] [Client thread/INFO]: Holder lookups applied
+[07:17:40] [Client thread/INFO]: Injecting itemstacks
+[07:17:40] [Client thread/INFO]: Itemstack injection complete
+[07:17:40] [Client thread/INFO]: Forge Mod Loader has successfully loaded 4 mods
+[07:17:40] [Client thread/INFO]: Narrator library for x86 successfully loaded
+[07:17:42] [Realms Notification Availability checker #1/INFO]: Could not authorize you against Realms server: Invalid session id
+[07:17:43] [Client thread/INFO]: Stopping!
+[07:17:43] [Client thread/INFO]: SoundSystem shutting down...
+[07:17:43] [Client thread/WARN]: Author: Paul Lamb, www.paulscode.com

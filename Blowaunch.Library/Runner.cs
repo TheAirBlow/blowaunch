@@ -5,9 +5,11 @@ using System.Numerics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using Blowaunch.Library.Downloader;
 using Newtonsoft.Json;
 using Serilog.Core;
+using Spectre.Console;
 
 namespace Blowaunch.Library
 {
@@ -31,60 +33,102 @@ namespace Blowaunch.Library
                 /// </summary>
                 public enum AuthType
                 {
-                    [JsonProperty("pretendMicrosoft")] PretendMicrosoft,
-                    [JsonProperty("microsoft")] Microsoft,
-                    [JsonProperty("mojang")] Mojang,
-                    [JsonProperty("none")] None
+                    PretendMicrosoft = 0,
+                    Microsoft = 1,
+                    Mojang = 2,
+                    None = 3
                 }
 
                 [JsonProperty("validUntil")] public DateTime ValidUntil;
-                [JsonProperty("xuid")] public string RefreshToken;
-                [JsonProperty("type")] public AuthType Type;
-                [JsonProperty("token")] public string Token;
-                [JsonProperty("xuid")] public string Xuid;
-                [JsonProperty("uuid")] public string Uuid;
+                [JsonProperty("refreshToken")] public string RefreshToken = "";
+                [JsonProperty("type")] public AuthType Type = AuthType.None;
+                [JsonProperty("token")] public string Token = "";
+                [JsonProperty("xuid")] public string Xuid = "";
+                [JsonProperty("uuid")] public string Uuid = "";
             }
 
-            [JsonProperty("maxRam")] public string RamMax;
-            [JsonProperty("jvmArgs")] public string JvmArgs;
-            [JsonProperty("gameArgs")] public string GameArgs;
-            [JsonProperty("username")] public string UserName;
+            /// <summary>
+            /// Version type
+            /// </summary>
+            public enum VersionType
+            {
+                /// <summary>
+                /// Official Mojang version
+                /// </summary>
+                OfficialMojang = 0,
+                
+                /// <summary>
+                /// A custom version located in .blowaunch/versions
+                /// </summary>
+                CustomVersionFromDir = 1,
+                
+                /// <summary>
+                /// Custom version with an addon config file in the
+                /// directory with the version and with name "addon.json"
+                /// </summary>
+                CustomWithAddonConfig = 2,
+                
+                /// <summary>
+                /// Official Mojang version with an addon config file
+                /// in the directory with the version and with name "addon.json"
+                /// </summary>
+                OfficialWithAddonConfig = 3,
+                
+                /// <summary>
+                /// Official Mojang version with an addon config file
+                /// that loads Forge Mod Loader, downloaded from GitHub repo
+                /// </summary>
+                OfficialWithForgeModLoader = 4,
+                
+                /// <summary>
+                /// Official Mojang version with an addon config file
+                /// that loads Fabric Mod Loader, downloaded from their API
+                /// </summary>
+                OfficialWithFabricModLoader = 5
+            }
+
+            [JsonProperty("maxRam")] public string RamMax = "";
+            [JsonProperty("jvmArgs")] public string JvmArgs = "";
+            [JsonProperty("gameArgs")] public string GameArgs = "";
+            [JsonProperty("username")] public string UserName = "";
             [JsonProperty("customResolution")] public bool CustomWindowSize;
-            [JsonProperty("windowSize")] public Vector2 WindowSize;
+            [JsonProperty("windowSize")] public Vector2 WindowSize = new(200, 200);
+            [JsonProperty("version")] public string Version = "";
+            [JsonProperty("type")] public VersionType Type = VersionType.OfficialMojang;
+            [JsonProperty("forceOffline")] public bool ForceOffline;
             [JsonProperty("isDemo")] public bool DemoUser;
-            [JsonProperty("auth")] public AuthClass Auth = new AuthClass();
+            [JsonProperty("auth")] public AuthClass Auth = new();
         }
 
         /// <summary>
         /// Generate run command
         /// </summary>
         /// <param name="main">Blowaunch Main JSON</param>
-        /// <param name="logger">Serilog Logger</param>
         /// <param name="config">Configuration</param>
         /// <returns>Generated command</returns>
-        public static string GenerateCommand(BlowaunchMainJson main, Configuration config, Logger logger)
+        public static string GenerateCommand(BlowaunchMainJson main, Configuration config)
         {
-            logger.Information("[Runner] Generating command");
+            AnsiConsole.WriteLine("[Runner] Generating command");
             var sb = new StringBuilder();
             sb.Append(string.IsNullOrEmpty(config.JvmArgs)
                 ? $"-Xms{config.RamMax} -Xmx{config.RamMax} "
                 : $"-Xms{config.RamMax} -Xmx{config.RamMax} {config.JvmArgs} ");
-            foreach (BlowaunchMainJson.JsonArgument arg in main.Arguments.Java) {
-                bool process = true;
-                foreach (string str in arg.Disallow) {
+            foreach (var arg in main.Arguments.Java) {
+                var process = true;
+                foreach (var str in arg.Disallow) {
                     if (process == false) continue;
                     process = !CheckBool(config, str);
                 }
 
                 if (process == false) continue;
-                foreach (string str in arg.Allow) {
+                foreach (var str in arg.Allow) {
                     if (process == false) continue;
                     process = CheckBool(config, str);
                 }
 
                 if (process == false) continue;
                 if (arg.ValueList.Length != 0) {
-                    foreach (string str in arg.ValueList) sb.Append($"{ReplacerJava(main, str, config)} ");
+                    foreach (var str in arg.ValueList) sb.Append($"{ReplacerJava(main, str, config)} ");
                     continue;
                 }
 
@@ -92,29 +136,29 @@ namespace Blowaunch.Library
             }
 
             sb.Append($"{main.MainClass} ");
-            foreach (BlowaunchMainJson.JsonArgument arg in main.Arguments.Game) {
-                bool process = true;
-                foreach (string str in arg.Disallow) {
+            foreach (var arg in main.Arguments.Game) {
+                var process = true;
+                foreach (var str in arg.Disallow) {
                     if (process == false) break;
                     process = !CheckBool(config, str);
                 }
 
                 if (process == false) continue;
-                foreach (string str in arg.Allow) {
+                foreach (var str in arg.Allow) {
                     if (process == false) break;
                     process = CheckBool(config, str);
                 }
 
                 if (process == false) continue;
                 if (arg.ValueList.Length != 0) {
-                    foreach (string str in arg.ValueList) sb.Append($"{ReplacerGame(config, str, main)} ");
+                    foreach (var str in arg.ValueList) sb.Append($"{ReplacerGame(config, str, main)} ");
                     continue;
                 } 
                 
                 sb.Append($"{ReplacerGame(config, arg.Value, main)} ");
             }
 
-            logger.Information($"[Runner] Full command: {sb}");
+            AnsiConsole.WriteLine($"[Runner] Full command: {sb}");
             return sb.ToString();
         }
 
@@ -153,14 +197,14 @@ namespace Blowaunch.Library
                             continue;
                         break;
                 }
-                bool process = true;
-                foreach (string str in lib.Disallow) {
+                var process = true;
+                foreach (var str in lib.Disallow) {
                     if (process == false) break;
                     process = !CheckBool(config, str);
                 }
 
                 if (process == false) continue;
-                foreach (string str in lib.Allow) {
+                foreach (var str in lib.Allow) {
                     if (process == false) break;
                     process = CheckBool(config, str);
                 }
@@ -198,7 +242,7 @@ namespace Blowaunch.Library
         /// <returns></returns>
         private static string ReplacerGame(Configuration config, string str, BlowaunchMainJson main)
         {
-            string newstr = str.Replace("${clientid}", "minecraft");
+            var newstr = str.Replace("${clientid}", "minecraft");
             newstr = newstr.Replace("${auth_player_name}", config.UserName)
                 .Replace("${assets_root}", FilesManager.Directories.AssetsRoot)
                 .Replace("${game_directory}", FilesManager.Directories.Root)
@@ -242,9 +286,22 @@ namespace Blowaunch.Library
                 case "has_custom_resolution": return config.CustomWindowSize;
                 default:
                     if (str.StartsWith("os-name:"))
-                        return Environment.OSVersion.Platform.ToString().ToLower() == str.Substring(8);
+                        switch (str.Substring(8)) {
+                            case "windows":
+                                return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+                            case "linux":
+                                return RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+                            case "macos":
+                                return RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
+                                       && Environment.OSVersion.Version.Major < 10 ||
+                                       Environment.OSVersion.Version.Minor < 12;
+                            case "osx":
+                                return RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
+                                       && Environment.OSVersion.Version.Major >= 10 ||
+                                       Environment.OSVersion.Version.Minor >= 12;
+                        }
                     if (str.StartsWith("os-version:"))
-                        return Environment.OSVersion.Version.ToString().ToLower() == str.Substring(11);
+                        return new Regex(Environment.OSVersion.Version.ToString()).Matches(str.Substring(11)).Count != 0;
                     return false;
             }
         }
@@ -253,19 +310,28 @@ namespace Blowaunch.Library
         /// Generate run command
         /// </summary>
         /// <param name="main">Blowaunch Main JSON</param>
-        /// <param name="logger">Serilog Logger</param>
         /// <param name="addon">Blowaunch Addon JSON</param>
         /// <param name="config">Configuration</param>
         /// <returns>Generated command</returns>
-        public static string GenerateCommand(BlowaunchMainJson main, BlowaunchAddonJson addon, Configuration config,
-            Logger logger) 
+        public static string GenerateCommand(BlowaunchMainJson main, BlowaunchAddonJson addon, Configuration config) 
         {
-            logger.Information("[Runner] Blowaunch Addon JSON is used");
+            AnsiConsole.WriteLine("[Runner] Blowaunch Addon JSON is used");
+            if (main.Version != addon.BaseVersion) {
+                AnsiConsole.MarkupLine($"[red]Incompatible addon and main JSON files![/]");
+                AnsiConsole.MarkupLine($"[red]Addon is for {addon.BaseVersion}, not for {main.Version}.[/]");
+                Environment.Exit(-1);
+            }
             var newlibs = main.Libraries.ToList();
             newlibs.AddRange(addon.Libraries);
             main.Libraries = newlibs.ToArray();
             main.MainClass = addon.MainClass;
-            return GenerateCommand(main, config, logger);
+            var gamelist = main.Arguments.Game.ToList();
+            gamelist.AddRange(addon.Arguments.Game);
+            main.Arguments.Game = gamelist.ToArray();
+            var javalist = main.Arguments.Java.ToList();
+            gamelist.AddRange(addon.Arguments.Java);
+            main.Arguments.Java = javalist.ToArray();
+            return GenerateCommand(main, config);
         }
     }
 }

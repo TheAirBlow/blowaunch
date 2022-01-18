@@ -24,7 +24,7 @@ namespace Blowaunch.Library
         [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
         private static BlowaunchMainJson ProcessLibraries(BlowaunchMainJson json)
         {
-            var toDelete = new List<JsonLibrary>();
+            var toDelete = new List<BlowaunchMainJson.JsonLibrary>();
             foreach (var lib in json.Libraries) {
                 /* Seems to cause problems
                 if (lib.Url == null) {
@@ -39,11 +39,11 @@ namespace Blowaunch.Library
                     continue;
                 }
 
-                if (lib.Url.Contains("maven")) {
-                    lib.Url = lib.Platform == "any" ? new StringBuilder().AppendFormat(lib.Url, string.Join("/", lib.Package.Split('.')), 
-                            lib.Name, lib.Version, string.Empty).ToString()
+                if (lib.Url.Contains("maven") && !lib.Url.EndsWith(".jar")) {
+                    lib.Url = lib.Platform == "any" ? $"{lib.Url}{string.Join("/", lib.Package.Split('.'))}/{lib.Name}/{lib.Version}/" +
+                                                      $"{lib.Name}-{lib.Version}.jar"
                         : new StringBuilder().AppendFormat(Fetcher.MojangEndpoints.Library, string.Join("/", 
-                                lib.Package.Split('.')), lib.Name, lib.Version, $"-natives-{lib.Platform}").ToString();
+                            lib.Package.Split('.')), lib.Name, lib.Version, $"-natives-{lib.Platform}").ToString();
                 }
                 
                 lib.ShaHash ??= Fetcher.Fetch($"{lib.Url}.sha1");
@@ -65,8 +65,8 @@ namespace Blowaunch.Library
             var json = new BlowaunchMainJson {
                 MainClass = mojang.MainClass,
                 Type = mojang.Type,
-                Author = "Mojang",
-                Information = "Official unmodified Minecraft version",
+                Author = "Mojang Studios",
+                Information = "Mojang JSON made to work with Blowaunch",
                 JavaMajor = mojang.JavaVersion.Major,
                 Arguments = new JsonArguments(),
                 Downloads = new JsonDownloads {
@@ -324,8 +324,8 @@ namespace Blowaunch.Library
             var json = new BlowaunchMainJson {
                 MainClass = mojang.MainClass,
                 Type = mojang.Type,
-                Author = "Mojang",
-                Information = "Official unmodified Legacy Minecraft version",
+                Author = "Mojang Studios",
+                Information = "Mojang Legacy JSON made to work with Blowaunch",
                 JavaMajor = mojang.JavaVersion.Major,
                 Arguments = new JsonArguments {
                     Java = new[] { new JsonArgument {
@@ -547,7 +547,7 @@ namespace Blowaunch.Library
         {
             [JsonProperty("id")] public string Id;
             [JsonProperty("sha1")] public string ShaHash;
-            [JsonProperty("size")] public int Size;
+            [JsonProperty("size")] public int? Size;
             [JsonProperty("sizeAssets")] public int AssetsSize;
             [JsonProperty("url")] public string Url;
         }
@@ -562,7 +562,7 @@ namespace Blowaunch.Library
             [JsonProperty("name")] public string Name;
             [JsonProperty("version")] public string Version;
             [JsonProperty("sha1")] public string ShaHash;
-            [JsonProperty("size")] public int Size;
+            [JsonProperty("size")] public int? Size;
             [JsonProperty("url")] public string Url;
             [JsonProperty("allow")] public string[] Allow;
             [JsonProperty("disallow")] public string[] Disallow;

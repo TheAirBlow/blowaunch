@@ -17,13 +17,14 @@ namespace Blowaunch.Library
         /// <returns>Addon JSON</returns>
         public static BlowaunchAddonJson GetAddon(string version)
         {
-            var loaders = JsonConvert.DeserializeObject<FabricLoadersJson>
-            (Fetcher.Fetch(new StringBuilder().AppendFormat(Fetcher.FabricEndpoints.VersionLoaders, version)
-                .ToString()));
+            var data = "{ \"Data\":" + Fetcher.Fetch(new StringBuilder().AppendFormat(
+                Fetcher.FabricEndpoints.VersionLoaders, version).ToString()) + "}";
+            var loaders = JsonConvert.DeserializeObject<FabricLoadersJson>(data);
             if (loaders == null)
                 throw new Exception($"Unable to find Fabric Loader JSON for {version}!");
-            return BlowaunchAddonJson.MojangToBlowaunch(JsonConvert.DeserializeObject<MojangMainJson>
-                (Fetcher.Fetch(new StringBuilder().AppendFormat(Fetcher.FabricEndpoints.LoaderJson, version, loaders.Data[0].Loader).ToString())));
+            return BlowaunchAddonJson.MojangToBlowaunch(JsonConvert.DeserializeObject<FabricJson>
+                (Fetcher.Fetch(new StringBuilder().AppendFormat(Fetcher.FabricEndpoints.LoaderJson, 
+                    version, loaders.Data[0].Loader.Version).ToString())));
         }
     }
 }

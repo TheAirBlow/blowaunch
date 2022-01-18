@@ -19,8 +19,8 @@ namespace Blowaunch.Library
         public static BlowaunchAssetsJson MojangToBlowaunch(MojangAssetsJson mojang)
         {
             var json = new BlowaunchAssetsJson {
-                Author = "TheAirBlow",
-                Information = "Mojang -> Blowaunch"
+                Author = "Mojang Studios",
+                Information = "Mojang Assets JSON made to work with Blowaunch"
             };
             json.Assets = mojang.Assets.Select(pair => new JsonAsset {
                 Name = pair.Key, 
