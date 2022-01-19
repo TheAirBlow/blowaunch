@@ -1,3 +1,4 @@
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -10,13 +11,14 @@ namespace Blowaunch.Library
     public static class HashHelper
     {
         /// <summary>
-        /// Get hash of buffer
+        /// Get hash of a file
         /// </summary>
-        /// <param name="input">Input</param>
+        /// <param name="file">Input file</param>
         /// <returns>Hash digest</returns>
-        public static string Hash(byte[] input)
+        public static string Hash(string file)
         {
-            var hash = new SHA1Managed().ComputeHash(input);
+            using var stream = new FileStream(file, FileMode.Open);
+            var hash = new SHA1Managed().ComputeHash(stream);
             return string.Concat(hash.Select(b => b.ToString("x2")));
         }
     }

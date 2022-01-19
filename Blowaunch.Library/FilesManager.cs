@@ -2,13 +2,9 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Text;
-using Newtonsoft.Json;
-using Serilog.Core;
 using Spectre.Console;
 
-namespace Blowaunch.Library.Downloader
+namespace Blowaunch.Library
 {
     /// <summary>
     /// Blowaunch Files Manager
@@ -62,7 +58,7 @@ namespace Blowaunch.Library.Downloader
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
             if (!File.Exists(path) && online) Fetcher.Download(asset.Url, path);
             
-            var hash = HashHelper.Hash(File.ReadAllBytes(path));
+            var hash = HashHelper.Hash(path);
             if (hash != asset.ShaHash) {
                 if (online) {
                     AnsiConsole.MarkupLine($"[yellow]{asset.Name} hash mismatch: {hash} and {asset.ShaHash}, redownloading...[/]");
@@ -79,15 +75,7 @@ namespace Blowaunch.Library.Downloader
         /// <param name="library">Blowaunch Library JSON</param>
         /// <returns>Path</returns>
         public static string GetLibraryPath(BlowaunchMainJson.JsonLibrary library)
-        {
-            string path;
-            if (library.Platform == "any")
-                path = Path.Combine(Directories.LibrariesRoot, library.Package.Replace('.', Path.DirectorySeparatorChar), 
-                    library.Name, library.Version, $"{library.Name}-{library.Version}.jar");
-            else path = Path.Combine(Directories.LibrariesRoot, library.Package.Replace('.', Path.DirectorySeparatorChar), 
-                library.Name, library.Version, $"{library.Name}-{library.Version}-natives-{library.Platform}.jar");
-            return path;
-        }
+            => Path.Combine(Directories.LibrariesRoot, library.Path.Replace('/', Path.DirectorySeparatorChar));
 
         /// <summary>
         /// Downloads a library
@@ -103,7 +91,7 @@ namespace Blowaunch.Library.Downloader
             var debug = $"{library.Package}:{library.Name}:{library.Version}:{library.Platform}";
             if (!File.Exists(path) && online) Fetcher.Download(library.Url, path);
             
-            var hash = HashHelper.Hash(File.ReadAllBytes(path));  
+            var hash = HashHelper.Hash(path);
             if (hash != library.ShaHash) {
                 if (online) {
                     AnsiConsole.MarkupLine($"[yellow]{debug} hash mismatch: {hash} and {library.ShaHash}, redownloading...[/]");
@@ -139,7 +127,10 @@ namespace Blowaunch.Library.Downloader
                 Fetcher.Download(main.Downloads.Client.Url, version);
                 Fetcher.Download(main.Logging.Download.Url, logging);
             }
-            var hash1 = HashHelper.Hash(File.ReadAllBytes(version));
+            
+            //if (main.Version.Contains("forge"))
+            //    AnsiConsole.MarkupLine("[yellow]Skipping hash checks, Forge will patch the client[/]");
+            var hash1 = HashHelper.Hash(version);
             if (hash1 != main.Downloads.Client.ShaHash) {
                 if (online) {
                     AnsiConsole.MarkupLine($"[yellow]{version} hash mismatch: {hash1} and {main.Downloads.Client.ShaHash}, redownloading...[/]");
@@ -147,7 +138,7 @@ namespace Blowaunch.Library.Downloader
                 } else AnsiConsole.MarkupLine($"[yellow]{version} hash mismatch: {hash1} and {main.Downloads.Client.ShaHash}, " +
                                               $"can't redownload in offline mode![/]");
             }
-            var hash2 = HashHelper.Hash(File.ReadAllBytes(logging));
+            var hash2 = HashHelper.Hash(logging);
             if (hash2 != main.Logging.Download.ShaHash) {
                 if (online) {
                     AnsiConsole.MarkupLine($"[yellow]{logging} hash mismatch: {hash2} and {main.Logging.Download.ShaHash}, redownloading...[/]");

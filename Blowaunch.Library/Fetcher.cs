@@ -20,8 +20,12 @@ namespace Blowaunch.Library
 
         public static class BlowaunchEndpoints
         {
-            public const string Forge = "https://github.com/TheAirBlow/blowaunch/raw/main/repo/forge.json";
-            public const string OpenJdk = "https://github.com/TheAirBlow/blowaunch/raw/main/repo/openjdk.json";
+            public const string OpenJdk = "https://github.com/TheAirBlow/blowaunch/raw/main/openjdk.json";
+        }
+
+        public static class ForgeEndpoints
+        {
+            public const string ForgeWebsite = "https://files.minecraftforge.net/net/minecraftforge/forge/index_{0}.html";
         }
         
         public static string Fetch(string url)

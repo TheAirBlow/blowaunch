@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using Blowaunch.Library.Downloader;
 using Newtonsoft.Json;
 using Serilog.Core;
 using Spectre.Console;
@@ -171,7 +170,8 @@ namespace Blowaunch.Library
         private static string GenerateClasspath(BlowaunchMainJson main, Configuration config)
         {
             var sb = new StringBuilder();
-            sb.Append($"\"{Path.Combine(FilesManager.Directories.VersionsRoot, main.Version, $"{main.Version}.jar")};");
+            var separator = Environment.OSVersion.Platform == PlatformID.Unix ? ":" : ";";
+            sb.Append($"\"{Path.Combine(FilesManager.Directories.VersionsRoot, main.Version, $"{main.Version}.jar")}{separator}");
             for (var index = 0; index < main.Libraries.Length; index++) {
                 var lib = main.Libraries[index];
                 if (lib.Extract) continue;
@@ -212,7 +212,7 @@ namespace Blowaunch.Library
                 if (process == false) continue;
                 sb.Append(index == main.Libraries.Length - 1
                     ? FilesManager.GetLibraryPath(lib)
-                    : $"{FilesManager.GetLibraryPath(lib)};");
+                    : $"{FilesManager.GetLibraryPath(lib)}{separator}");
             }
             sb.Append("\"");
             return sb.ToString();
@@ -230,7 +230,10 @@ namespace Blowaunch.Library
             return str.Replace("${natives_directory}", Path.Combine(FilesManager.Directories.VersionsRoot,
                     main.Version, "natives")).Replace("${launcher_name}", "Blowaunch")
                 .Replace("${launcher_version}", Assembly.GetExecutingAssembly().GetName().Version!.ToString())
-                .Replace("${classpath}", GenerateClasspath(main, config));
+                .Replace("${classpath}", GenerateClasspath(main, config))
+                .Replace("${classpath_separator}", Environment.OSVersion.Platform == PlatformID.Unix ? ":" : ";")
+                .Replace("${library_directory}", FilesManager.Directories.LibrariesRoot)
+                .Replace("${version_name}", main.Version);
         }
 
         /// <summary>
@@ -325,12 +328,15 @@ namespace Blowaunch.Library
             newlibs.AddRange(addon.Libraries);
             main.Libraries = newlibs.ToArray();
             main.MainClass = addon.MainClass;
-            var gamelist = main.Arguments.Game.ToList();
-            gamelist.AddRange(addon.Arguments.Game);
-            main.Arguments.Game = gamelist.ToArray();
-            var javalist = main.Arguments.Java.ToList();
-            gamelist.AddRange(addon.Arguments.Java);
-            main.Arguments.Java = javalist.ToArray();
+            if (!addon.Legacy) {
+                var gamelist = main.Arguments.Game.ToList();
+                gamelist.AddRange(addon.Arguments.Game);
+                main.Arguments.Game = gamelist.ToArray();
+                var javalist = main.Arguments.Java.ToList();
+                javalist.AddRange(addon.Arguments.Java);
+                main.Arguments.Java = javalist.ToArray();
+            } else main.Arguments.Game = addon.Arguments.Game;
+
             return GenerateCommand(main, config);
         }
     }
