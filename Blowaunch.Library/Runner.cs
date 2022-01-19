@@ -32,7 +32,7 @@ namespace Blowaunch.Library
                 /// </summary>
                 public enum AuthType
                 {
-                    PretendMicrosoft = 0,
+                    //PretendMicrosoft = 0,
                     Microsoft = 1,
                     Mojang = 2,
                     None = 3
@@ -251,26 +251,21 @@ namespace Blowaunch.Library
                 .Replace("${game_directory}", FilesManager.Directories.Root)
                 .Replace("${version_type}", main.Type.ToString().ToLower())
                 .Replace("${assets_index_name}", main.Assets.Id).Replace("${version_name}", main.Version);
-            if (config.Auth.Type == Configuration.AuthClass.AuthType.None)
-                newstr = newstr.Replace("${clientid}", "noauth").Replace("${auth_access_token}", "noauth")
-                    .Replace("${user_type}", "noauth").Replace("${auth_xuid}", "noauth")
-                    .Replace("${auth_uuid}", "noauth");
-            else {
-                newstr = newstr.Replace("${user_type}", config.Auth.Type.ToString().ToLower());
-                switch (config.Auth.Type) {
-                    case Configuration.AuthClass.AuthType.Microsoft:
-                        newstr = newstr.Replace("${auth_access_token}", config.Auth.Token)
-                            .Replace("${auth_xuid}", config.Auth.Xuid).Replace("${auth_uuid}", "noauth");
-                        break;
-                    case Configuration.AuthClass.AuthType.PretendMicrosoft:
-                        newstr = newstr.Replace("${auth_access_token}", config.Auth.Token)
-                            .Replace("${auth_xuid}", config.Auth.Xuid).Replace("${auth_uuid}", "noauth");
-                        break;
-                    case Configuration.AuthClass.AuthType.Mojang:
-                        newstr = newstr.Replace("${auth_access_token}", config.Auth.Token)
-                            .Replace("${auth_xuid}", "noauth").Replace("${auth_uuid}", config.Auth.Uuid);
-                        break;
-                }
+            newstr = newstr.Replace("${user_type}", config.Auth.Type.ToString().ToLower());
+            switch (config.Auth.Type) {
+                case Configuration.AuthClass.AuthType.Microsoft:
+                    newstr = newstr.Replace("${auth_access_token}", config.Auth.Token)
+                        .Replace("${auth_xuid}", config.Auth.Xuid).Replace("${auth_uuid}", config.Auth.Uuid);
+                    break;
+                case Configuration.AuthClass.AuthType.Mojang:
+                    newstr = newstr.Replace("${auth_access_token}", config.Auth.Token)
+                        .Replace("${auth_xuid}", "noauth").Replace("${auth_uuid}", config.Auth.Uuid);
+                    break;
+                default:
+                    newstr = newstr.Replace("${clientid}", "noauth").Replace("${auth_access_token}", "noauth")
+                        .Replace("${user_type}", "noauth").Replace("${auth_xuid}", "noauth")
+                        .Replace("${auth_uuid}", "noauth");
+                    break;
             }
 
             return newstr;

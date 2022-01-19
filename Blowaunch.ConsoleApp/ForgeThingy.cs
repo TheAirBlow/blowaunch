@@ -28,7 +28,6 @@ namespace Blowaunch.ConsoleApp
         public static string GetLink(string version)
         {
             try {
-                AnsiConsole.WriteLine("[Forge] Parsing website...");
                 var forgeLink = string.Format(Fetcher.ForgeEndpoints.ForgeWebsite, version);
                 var content = Fetcher.Fetch(forgeLink);
                 var recommended = content.IndexOf("Download Recommended", StringComparison.Ordinal);
@@ -110,8 +109,6 @@ namespace Blowaunch.ConsoleApp
                 var data = MojangLegacyMainJson.IsLegacyJson(content) 
                     ? BlowaunchMainJson.MojangToBlowaunchPartial(JsonConvert.DeserializeObject<MojangLegacyMainJson>(content)) 
                     : BlowaunchMainJson.MojangToBlowaunchPartial(JsonConvert.DeserializeObject<MojangMainJson>(content));
-                var contentInstaller = File.ReadAllText(Path.Combine(dir, "install_profile.json"));
-                var dataInstaller = JsonConvert.DeserializeObject<ForgeInstallerJson>(contentInstaller);
                 task.Description = "Processing addon";
                 var addon = new BlowaunchAddonJson {
                     Legacy = MojangLegacyMainJson.IsLegacyJson(content),
@@ -135,18 +132,43 @@ namespace Blowaunch.ConsoleApp
 
                 addon.Arguments.Game = data.Arguments.Game;
                 addon.Arguments.Java = data.Arguments.Java;
+                addon.Libraries = libraries.ToArray();
+                task.StopTask();
+                return addon;
+            });
+        }
+
+        /// <summary>
+        /// Run processors
+        /// </summary>
+        /// <param name="main">Main JSON</param>
+        /// <param name="online">Is in online mode</param>
+        /// <returns>The addon JSON</returns>
+        public static void RunProcessors(BlowaunchMainJson main, bool online)
+        {
+            var progress = AnsiConsole.Progress()
+                .HideCompleted(true)
+                .Columns(new TaskDescriptionColumn(),
+                    new ProgressBarColumn(),
+                    new PercentageColumn(),
+                    new ElapsedTimeColumn());
+            progress.Start(ctx => {
+                var task = ctx.AddTask("Downloading installer").IsIndeterminate();
+                task.StartTask();
+                var jar = Path.Combine(Path.GetTempPath(), ".blowaunch-forge", "installer.jar");
+                var dir = Path.Combine(Path.GetTempPath(), ".blowaunch-forge");
+                var contentInstaller = File.ReadAllText(Path.Combine(dir, "install_profile.json"));
+                var dataInstaller = JsonConvert.DeserializeObject<ForgeInstallerJson>(contentInstaller);
+                if (File.Exists(Path.Combine(FilesManager.Directories.VersionsRoot, main.Version, $"forge.json"))) {
+                    AnsiConsole.WriteLine("[Forge] Skipping processors, already done!");
+                    task.StopTask();
+                }
                 task.Description = "Processing artifact paths";
                 var descriptors = new Dictionary<string, string>();
                 foreach (var i in dataInstaller?.Data!)
                     descriptors.Add(i.Key, ArtifactPath(i.Value.Client, false));
-
-                if (File.Exists(Path.Combine(FilesManager.Directories.VersionsRoot, main.Version, $"forge.json"))) {
-                    AnsiConsole.WriteLine("[Forge] Skipping processors, already done!");
-                    task.StopTask();
-                    return addon;
-                }
                 task.IsIndeterminate = false;
-                task.MaxValue = dataInstaller.Libraries.Length;
+                task.MaxValue = dataInstaller!.Libraries.Length;
                 foreach (var lib in dataInstaller.Libraries) {
                     var split = lib.Name.Split(":");
                     split[2] = split[2].Split('@')[0];
@@ -155,7 +177,7 @@ namespace Blowaunch.ConsoleApp
                         var dest = Path.Combine(FilesManager.Directories.Root, "forge", 
                             $"{split[1]}-{split[2]}{Path.GetExtension(lib.Downloads.Artifact.Path)}");
                         if (!Directory.Exists(Path.GetDirectoryName(dest))) Directory.CreateDirectory(Path.GetDirectoryName(dest)!);
-                        if (!File.Exists(dest)) File.Copy(Path.Combine(dir, "maven", lib.Downloads.Artifact.Path.Replace('/', 
+                        if (!File.Exists(dest)) File.Copy(Path.Combine(dir, "maven", lib.Downloads.Artifact.Path!.Replace('/', 
                             Path.DirectorySeparatorChar)), dest);
                         lib.Downloads.Artifact.Url = $"file://{dest}"; // :bigbrain:
                     }
@@ -173,12 +195,11 @@ namespace Blowaunch.ConsoleApp
                         Path = lib.Downloads.Artifact.Path,
                         Size = lib.Downloads.Artifact.Size,
                         Url = lib.Downloads.Artifact.Url
-                    }, main.Version, true);
+                    }, main.Version, online);
                     task.Increment(1);
                 }
 
                 task.Value = 0;
-                addon.Libraries = libraries.ToArray();
                 task.Description = $"Running processors";
                 task.MaxValue = dataInstaller.Processors.Length;
                 for (var index = 0; index < dataInstaller.Processors.Length; index++) {
@@ -188,12 +209,8 @@ namespace Blowaunch.ConsoleApp
                         task.Increment(1);
                         continue;
                     }
-                    var possiblePath1 = libraries.FirstOrDefault(x => 
-                        $"{x.Package}:{x.Name}:{x.Version}" == proc.Jar);
-                    var possiblePath2 = dataInstaller.Libraries
-                        .FirstOrDefault(x => x.Name == proc.Jar);
-                    var artifactPath = possiblePath1 == null ? possiblePath2.Downloads.Artifact.Path : possiblePath1.Path;
-                    var file = FilesManager.GetLibraryPath(new BlowaunchMainJson.JsonLibrary { Path = artifactPath });
+                    var file = FilesManager.GetLibraryPath(new BlowaunchMainJson.JsonLibrary { Path = dataInstaller.Libraries
+                        .FirstOrDefault(x => x.Name == proc.Jar)!.Downloads.Artifact.Path });
                     var mainClass = "<couldn't find>";
                     using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read))
                     using (var zf = new ICSharpCode.SharpZipLib.Zip.ZipFile(fs)) {
@@ -212,12 +229,8 @@ namespace Blowaunch.ConsoleApp
                     var classpath = new StringBuilder();
                     var separator = Environment.OSVersion.Platform == PlatformID.Unix ? ":" : ";";
                     foreach (var str in proc.Classpath) {
-                        var possiblePath12 = libraries.FirstOrDefault(x => 
-                            $"{x.Package}:{x.Name}:{x.Version}" == str);
-                        var possiblePath22 = dataInstaller.Libraries
-                            .FirstOrDefault(x => x.Name == str);
-                        var artifactPath2 = possiblePath1 == null ? possiblePath22.Downloads.Artifact.Path : possiblePath12.Path;
-                        var file2 = FilesManager.GetLibraryPath(new BlowaunchMainJson.JsonLibrary { Path = artifactPath2 });
+                        var file2 = FilesManager.GetLibraryPath(new BlowaunchMainJson.JsonLibrary { Path = dataInstaller.Libraries
+                            .FirstOrDefault(x => x.Name == str)!.Downloads.Artifact.Path });
                         classpath.Append($"{file2}{separator}");
                     }
 
@@ -225,8 +238,7 @@ namespace Blowaunch.ConsoleApp
                     var args = new StringBuilder();
                     foreach (var arg in proc.Arguments) {
                         var replaced = arg.Replace("{ROOT}", FilesManager.Directories.Root)
-                            .Replace("{INSTALLER}",
-                                Path.Combine(Path.GetTempPath(), ".blowaunch-forge", "installer.jar"))
+                            .Replace("{INSTALLER}", jar)
                             .Replace("{MINECRAFT_JAR}", Path.Combine(FilesManager.Directories.VersionsRoot,
                                 main.Version,
                                 $"{main.Version}.jar")).Replace("{SIDE}", "client")
@@ -286,7 +298,6 @@ namespace Blowaunch.ConsoleApp
                     task.Increment(1);
                 }
                 task.StopTask();
-                return addon;
             });
         } 
     }

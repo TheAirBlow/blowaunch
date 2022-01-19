@@ -5,6 +5,7 @@ using System.IO;
 using System.Net;
 using System.Reflection;
 using Blowaunch.Library;
+using Blowaunch.Library.Authentication;
 using Newtonsoft.Json;
 using Spectre.Console;
 
@@ -52,12 +53,37 @@ namespace Blowaunch.ConsoleApp
             
             var online = CheckForInternet();
             if (json.ForceOffline) online = false;
-            AnsiConsole.WriteLine(json.ForceOffline 
-                ? $"[Internet] Offline mode forced by configuration"
+            AnsiConsole.MarkupLine(json.ForceOffline 
+                ? $"[yellow]Offline mode forced by configuration[/]"
                 : online 
-                    ? $"[Internet] Internet connection present, online mode"
-                    : $"[Internet] No internet, offline mode");
-            
+                    ? $"[green]Internet connection present, online mode[/]"
+                    : $"[yellow]No internet, offline mode[/]");
+
+            if (!online && json.Auth.Type != Runner.Configuration.AuthClass.AuthType.None)
+                AnsiConsole.MarkupLine("[yellow]No authentication will be performed in offline mode![/]");
+            else {
+                switch (json.Auth.Type) {
+                    case Runner.Configuration.AuthClass.AuthType.Microsoft:
+                        if (File.Exists("microsoft.json")) {
+                            if (!MicrosoftAuth.Authenticate(File.ReadAllText(
+                                    "microsoft.json"), ref json)) {
+                                AnsiConsole.MarkupLine($"[red]Authentication failed! Please try again.[/]");
+                                return;
+                            }
+                            File.Delete("microsoft.json");
+                        } 
+                        
+                        if (!MicrosoftAuth.CheckAuth(ref json)) {
+                            AnsiConsole.MarkupLine($"[red]Please authenticate and save the JSON as \"microsoft.json\"![/]");
+                            MicrosoftAuth.OpenAuth();
+                            return;
+                        } else AnsiConsole.MarkupLine($"[green]Succeffully authenticated![/]");
+                        File.WriteAllText("config.json", JsonConvert
+                            .SerializeObject(new Runner.Configuration(), Formatting.Indented));
+                        break;
+                }
+            }
+
             var mainJsonPath =
                 Path.Combine(FilesManager.Directories.VersionsRoot, json.Version, $"version.json");
             var addonJsonPath =
@@ -188,6 +214,7 @@ namespace Blowaunch.ConsoleApp
                     }
                     
                     MainDownloader.DownloadAll(mainJson, addonJson, online);
+                    ForgeThingy.RunProcessors(mainJson, online);
                     command = Runner.GenerateCommand(mainJson, addonJson, json);
                     File.WriteAllText(addonForgeJsonPath, JsonConvert.SerializeObject(addonJson, Formatting.Indented));
                     break;

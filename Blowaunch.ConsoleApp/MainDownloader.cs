@@ -33,42 +33,37 @@ namespace Blowaunch.ConsoleApp
             var assetsMojang = JsonConvert.DeserializeObject<MojangAssetsJson>(Fetcher.Fetch(main.Assets.Url));
             var assetsBlowaunch = BlowaunchAssetsJson.MojangToBlowaunch(assetsMojang);
             progress.Start(i => {
-                var libs = i.AddTask("Libraries");
-                AnsiConsole.WriteLine("[Downloader] Downloading libraries...");
-                libs.MaxValue = main.Libraries.Length;
+                var task = i.AddTask("Libraries");
+                task.MaxValue = main.Libraries.Length;
                 foreach (var lib in main.Libraries) {
-                    libs.Description = $"Downloading {lib.Name} v{lib.Version} {lib.Platform}";
+                    task.Description = $"Downloading library {lib.Name} v{lib.Version} {lib.Platform}";
                     FilesManager.DownloadLibrary(lib, main.Version, online);
-                    libs.Increment(1);
+                    task.Increment(1);
                 }
-
-                libs.StopTask();
-                AnsiConsole.WriteLine("[Downloader] Saving assets index...");
+                
+                task.IsIndeterminate = true;
+                task.Description = $"Saving asset index";
                 File.WriteAllText(Path.Combine(FilesManager.Directories.AssetsIndexes, $"{main.Assets.Id}.json"),
                     JsonConvert.SerializeObject(assetsMojang));
-                var assets = i.AddTask("Assets");
-                assets.MaxValue = assetsBlowaunch.Assets.Length;
-                AnsiConsole.WriteLine("[Downloader] Downloading assets...");
+                task.IsIndeterminate = false;
+                task.MaxValue = assetsBlowaunch.Assets.Length;
                 foreach (var asset in assetsBlowaunch.Assets) {
-                    assets.Description = $"{asset.Name}";
+                    task.Description = $"Downloading asset {Path.GetFileName(asset.Name)}";
                     FilesManager.DownloadAsset(asset, online);
-                    assets.Increment(1);
+                    task.Increment(1);
                 }
-
-                assets.StopTask();
-                var client = i.AddTask("Client").IsIndeterminate();
-                AnsiConsole.WriteLine("[Downloader] Downloading client...");
-                FilesManager.DownloadClient(main, online);
-                client.StopTask();
                 
+                task.IsIndeterminate = true;
+                task.Description = $"Downloading client";
+                FilesManager.DownloadClient(main, online);
+
                 var dir = Path.Combine(FilesManager.Directories.JavaRoot, main.JavaMajor.ToString());
                 var extract = Path.Combine(FilesManager.Directories.JavaRoot);
                 if (online) {
                     if (!Directory.Exists(dir)) {
-                        var task = i.AddTask("OpenJDK").IsIndeterminate();
                         task.Description = "Fetching";
                         var openjdk = JsonConvert.DeserializeObject<OpenJdkJson>(Fetcher.Fetch(Fetcher.BlowaunchEndpoints.OpenJdk));
-                        if (!openjdk.Versions.ContainsKey(main.JavaMajor)) {
+                        if (!openjdk!.Versions.ContainsKey(main.JavaMajor)) {
                             AnsiConsole.MarkupLine($"[red]Unable to find OpenJDK version {main.JavaMajor}![/]");
                             AnsiConsole.MarkupLine($"[red]Please report it to us on the GitHub issues page.[/]");
                             return;
@@ -126,11 +121,9 @@ namespace Blowaunch.ConsoleApp
                             AnsiConsole.MarkupLine($"[red]Your OS is not supported![/]");
                             return;
                         }
-                        task.StopTask();
                     } else AnsiConsole.WriteLine("[OpenJDK] Skipping, already downloaded!");
                 } else AnsiConsole.WriteLine("[OpenJDK] Skipping, we are in offline mode");
-
-                AnsiConsole.WriteLine("[Downloader] Done!");
+                task.StopTask();
             });
         }
 
@@ -152,15 +145,6 @@ namespace Blowaunch.ConsoleApp
             newlibs.AddRange(addon.Libraries);
             main.Libraries = newlibs.ToArray();
             main.MainClass = addon.MainClass;
-            /* Is not required and dublicates the arguments
-               It is done in the Runner when it's needed
-            var gamelist = main.Arguments.Game.ToList();
-            gamelist.AddRange(addon.Arguments.Game);
-            main.Arguments.Game = gamelist.ToArray();
-            var javalist = main.Arguments.Java.ToList();
-            javalist.AddRange(addon.Arguments.Java);
-            main.Arguments.Java = javalist.ToArray();
-            */
             DownloadAll(main, online);
         }
     }

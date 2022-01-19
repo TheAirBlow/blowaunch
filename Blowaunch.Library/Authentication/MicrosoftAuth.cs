@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Text;
 using Newtonsoft.Json;
+using Spectre.Console;
 
 namespace Blowaunch.Library.Authentication
 {
@@ -56,7 +57,10 @@ namespace Blowaunch.Library.Authentication
         /// Opens Microsoft OAuth 2.0 in browser
         /// </summary>
         public static void OpenAuth()
-            => Process.Start(Endpoints.Microsoft.LoginBrowser);
+            => Process.Start(new ProcessStartInfo {
+                FileName = Endpoints.Microsoft.LoginBrowser,
+                UseShellExecute = true
+            });
         
         /// <summary>
         /// Authenticates with microsoft response JSON
@@ -65,8 +69,7 @@ namespace Blowaunch.Library.Authentication
         /// <param name="config">Configuration</param>
         public static bool Authenticate(string microsoftJson, ref Runner.Configuration config)
         {
-            if (config.Auth.Type != Runner.Configuration.AuthClass.AuthType.Microsoft &&
-                config.Auth.Type != Runner.Configuration.AuthClass.AuthType.PretendMicrosoft)
+            if (config.Auth.Type != Runner.Configuration.AuthClass.AuthType.Microsoft)
                 return false;
             var responseJson = JsonConvert.DeserializeObject<MicrosoftTokenJson>(microsoftJson);
             if (responseJson == null || string.IsNullOrEmpty(responseJson.AccessToken)) return false;
@@ -81,6 +84,9 @@ namespace Blowaunch.Library.Authentication
         public static bool CheckAuth(ref Runner.Configuration config)
         {
             if (config.Auth.ValidUntil > DateTime.Now) return true;
+            if (string.IsNullOrEmpty(config.Auth.Xuid)
+                || string.IsNullOrEmpty(config.Auth.RefreshToken)
+                || string.IsNullOrEmpty(config.Auth.Token)) return false;
             var responseJson = JsonConvert.DeserializeObject<MicrosoftTokenJson>(
                 Fetcher.Fetch(new StringBuilder().AppendFormat(Endpoints.Microsoft.Refresh, 
                     config.Auth.RefreshToken).ToString()));
@@ -96,34 +102,47 @@ namespace Blowaunch.Library.Authentication
         /// <param name="config">Configuration</param>
         private static bool AuthMain(MicrosoftTokenJson json, ref Runner.Configuration config)
         {
-            // Exception here - Authentication error
-            var xboxJson = JsonConvert.DeserializeObject<XboxJson>(
-                Fetcher.Fetch(new StringBuilder().AppendFormat(Endpoints.Microsoft.XboxLogin,
-                    json.AccessToken).ToString()));
+            var xboxJsonData = Fetcher.Fetch(new StringBuilder().AppendFormat(Endpoints.Microsoft.XboxLogin,
+                json.AccessToken).ToString());
+            if (!xboxJsonData.StartsWith("{")) {
+                AnsiConsole.MarkupLine($"[red]Step 1: {xboxJsonData}[/]");
+                return false;
+            }
+            var xboxJson = JsonConvert.DeserializeObject<XboxJson>(xboxJsonData);
             if (xboxJson == null || string.IsNullOrEmpty(xboxJson.Token)) return false;
-            // Exception here - Authentication error, XErr code
-            var xstsJson = JsonConvert.DeserializeObject<XboxJson>(
-                Fetcher.Fetch(new StringBuilder().AppendFormat(Endpoints.Microsoft.XboxXsts,
-                    xboxJson.Token, xboxJson.Claims.Xuis[0].UserHash).ToString()));
+            var xstsJsonData = Fetcher.Fetch(new StringBuilder().AppendFormat(Endpoints.Microsoft.XboxXsts,
+                xboxJson.Token, xboxJson.Claims.Xuis[0].UserHash).ToString());
+            if (!xboxJsonData.StartsWith("{")) {
+                AnsiConsole.MarkupLine($"[red]Step 2: {xstsJsonData}[/]");
+                return false;
+            }
+            var xstsJson = JsonConvert.DeserializeObject<XboxJson>(xstsJsonData);
             if (xstsJson == null || string.IsNullOrEmpty(xstsJson.Token)) return false;
-            // Exception here - Unexpected error
-            var minecraftJson = JsonConvert.DeserializeObject<MinecraftTokenJson>(
-                Fetcher.Fetch(new StringBuilder().AppendFormat(Endpoints.Microsoft.MinecraftLogin,
-                    xboxJson.Token, xboxJson.Claims.Xuis[0].UserHash).ToString()));
+            var minecraftJsonData = Fetcher.Fetch(new StringBuilder().AppendFormat(Endpoints.Microsoft.MinecraftLogin,
+                xboxJson.Token, xboxJson.Claims.Xuis[0].UserHash).ToString());
+            if (!minecraftJsonData.StartsWith("{")) {
+                AnsiConsole.MarkupLine($"[red]Step 3: {minecraftJsonData}[/]");
+                return false;
+            }
+            var minecraftJson = JsonConvert.DeserializeObject<MinecraftTokenJson>(minecraftJsonData);
             if (minecraftJson == null || string.IsNullOrEmpty(minecraftJson.AccessToken)) return false;
             config.Auth.Token = minecraftJson.AccessToken;
             config.Auth.Xuid = minecraftJson.Xuid;
-            if (config.Auth.Type != Runner.Configuration.AuthClass.AuthType.PretendMicrosoft) {
-                if (Fetcher.Fetch(new StringBuilder().AppendFormat(Endpoints.Microsoft.Ownership,
-                    minecraftJson.AccessToken).ToString()) != "ownership-confirmed") return false;
-                // Exception here - Unexpected error
-                var profileJson = JsonConvert.DeserializeObject<AccountJson>(
-                    Fetcher.Fetch(new StringBuilder().AppendFormat(Endpoints.Microsoft.Profile,
-                        minecraftJson.AccessToken).ToString()));
-                if (profileJson == null || string.IsNullOrEmpty(profileJson.Id)) return false;
-                config.UserName = profileJson.UserName;
-                config.Auth.Uuid = profileJson.Id;
+            if (Fetcher.Fetch(new StringBuilder().AppendFormat(Endpoints.Microsoft.Ownership,
+                    minecraftJson.AccessToken).ToString()) != "ownership-confirmed") {
+                AnsiConsole.MarkupLine("[red]You do not own Minecraft![/]");
+                return false;
             }
+            var profileJsonData = Fetcher.Fetch(new StringBuilder().AppendFormat(Endpoints.Microsoft.Profile,
+                minecraftJson.AccessToken).ToString());
+            if (!profileJsonData.StartsWith("{")) {
+                AnsiConsole.MarkupLine($"[red]Step 5: {profileJsonData}[/]");
+                return false;
+            }
+            var profileJson = JsonConvert.DeserializeObject<AccountJson>(profileJsonData);
+            if (profileJson == null || string.IsNullOrEmpty(profileJson.Id)) return false;
+            config.UserName = profileJson.UserName;
+            config.Auth.Uuid = profileJson.Id;
             return true;
         }
     }
