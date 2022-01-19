@@ -16,7 +16,7 @@ But it is not interactive at all, nor requires any arguments. \
 Instead we use `config.json`, which is in the same directory as the ConsoleApp. \
 If such a file won't exist, Blowaunch will create one for you. \
 Here is how the config looks like (with comments):
-```json
+```json5
 {
   "maxRam": "",   // Maximum RAM, for example 1024M
   "jvmArgs": "",  // Java VM arguments, optional
