@@ -12,7 +12,7 @@ namespace Blowaunch.ConsoleApp
 {
     public static class Program
     {
-        public static bool CheckForInternet(int timeoutMs = 5000)
+        private static bool CheckForInternet(int timeoutMs = 5000)
         {
             try {
                 var request = (HttpWebRequest)WebRequest.Create("https://google.com");
@@ -41,7 +41,7 @@ namespace Blowaunch.ConsoleApp
                 AnsiConsole.MarkupLine("[red]config.json does not exist![/]");
                 AnsiConsole.MarkupLine("[red]An empty one was created.[/]");
                 File.WriteAllText("config.json", JsonConvert
-                    .SerializeObject(new Runner.Configuration()));
+                    .SerializeObject(new Runner.Configuration(), Formatting.Indented));
                 return;
             }
 
@@ -160,7 +160,7 @@ namespace Blowaunch.ConsoleApp
                     
                     MainDownloader.DownloadAll(mainJson, addonJson, online);
                     command = Runner.GenerateCommand(mainJson, addonJson, json);
-                    File.WriteAllText(addonFabricJsonPath, JsonConvert.SerializeObject(addonJson));
+                    File.WriteAllText(addonFabricJsonPath, JsonConvert.SerializeObject(addonJson, Formatting.Indented));
                     break;
                 case Runner.Configuration.VersionType.OfficialWithForgeModLoader:
                     if (online) {
@@ -189,7 +189,7 @@ namespace Blowaunch.ConsoleApp
                     
                     MainDownloader.DownloadAll(mainJson, addonJson, online);
                     command = Runner.GenerateCommand(mainJson, addonJson, json);
-                    File.WriteAllText(addonForgeJsonPath, JsonConvert.SerializeObject(addonJson));
+                    File.WriteAllText(addonForgeJsonPath, JsonConvert.SerializeObject(addonJson, Formatting.Indented));
                     break;
             }
 
@@ -202,7 +202,7 @@ namespace Blowaunch.ConsoleApp
                 AnsiConsole.WriteLine($"[JSON] Addon author: {addonJson.Author}");
                 AnsiConsole.WriteLine($"[JSON] Addon information: {addonJson.Information}");
             }
-            File.WriteAllText(mainJsonPath, JsonConvert.SerializeObject(mainJson));
+            File.WriteAllText(mainJsonPath, JsonConvert.SerializeObject(mainJson, Formatting.Indented));
 
             AnsiConsole.WriteLine($"[Runner] Starting minecraft...");
             var proc = new Process();
