@@ -1,0 +1,428 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Blowaunch.AvaloniaApp.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Blowaunch.AvaloniaApp.Views.MainWindow"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Blowaunch"
+        Width="800" Height="450"
+        CanResize="False">
+    
+    <Window.Background>
+        <ImageBrush Source="/Assets/background.png"
+                    Opacity="100"/>
+    </Window.Background>
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+    
+    <Panel>
+        <SplitView IsPaneOpen="True"
+                   DisplayMode="Inline"
+                   OpenPaneLength="280">
+            <SplitView.Pane>
+                <!-- Left Panel -->
+                <StackPanel>
+                    <Panel>
+                        <Image Source="/Assets/logo.png"
+                               Margin="20 -10 20 10"/>
+                        <TextBlock HorizontalAlignment="Center"
+                                   Text="Crossplatform open-source launcher"
+                                   Margin="0 60 0 10"/>
+                    </Panel>
+                    <Border Background="Black"
+                            Opacity="50"
+                            CornerRadius="5"
+                            Margin="20 0 20 10">
+                        <Panel>
+                            <StackPanel Height="62">
+                                <TextBlock Text="TheAirBlow" FontWeight="Bold"
+                                           HorizontalAlignment="Left"
+                                           Margin="20 10 20 0"/>
+                                <TextBlock Text="No authentication"
+                                           HorizontalAlignment="Left"
+                                           Margin="20 5 20 0"/>
+                            </StackPanel>
+                            <Button HorizontalAlignment="Right"
+                                    Height="62" Width="80"
+                                    Background="#808080"
+                                    Opacity="20" Click="OpenAuthPanel"
+                                    CornerRadius="0 5 5 0">
+                                <PathIcon Data="{StaticResource
+                                SettingsRegular}"
+                                          Opacity="10"/>
+                            </Button>
+                        </Panel>
+                    </Border>
+                    <TextBlock Text="Minecraft version:" 
+                               HorizontalAlignment="Center"
+                               Margin="0 30 0 10"/>
+                    <ComboBox HorizontalAlignment="Center"
+                              Width="200" SelectedIndex="0"
+                              Name="Versions">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding 
+                                Name}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                        <ComboBoxItem>
+                            <TextBlock Text="Loading..."/>
+                        </ComboBoxItem>
+                    </ComboBox>
+                    <TextBlock Text="Modding:" 
+                               HorizontalAlignment="Center"
+                               Margin="0 20 0 10"/>
+                    <ComboBox HorizontalAlignment="Center"
+                              Width="200" SelectedIndex="0">
+                        <ComboBoxItem Name="Vanilla">
+                            <TextBlock Text="None"
+                                       HorizontalAlignment="Left"/>
+                        </ComboBoxItem>
+                        <ComboBoxItem Name="Forge">
+                            <TextBlock Text="Forge"
+                                       HorizontalAlignment="Left"/>
+                        </ComboBoxItem>
+                        <ComboBoxItem Name="Fabric">
+                            <TextBlock Text="Fabric"
+                                       HorizontalAlignment="Left"/>
+                        </ComboBoxItem>
+                    </ComboBox>
+                    <StackPanel HorizontalAlignment="Center" 
+                                Orientation="Horizontal"
+                                Margin="0 15 0 0">
+                        <Button Height="35" Width="135"
+                                Background="#1fa803"
+                                Opacity="20"
+                                CornerRadius="5">
+                            <Button.Styles>
+                                <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                    <Setter Property="Background" 
+                                            Value="#22cb00"/>
+                                </Style>
+                                <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                                    <Setter Property="Background" 
+                                            Value="#27d803"/>
+                                </Style>
+                            </Button.Styles>
+                            <StackPanel Orientation="Horizontal">
+                                <PathIcon Data="{StaticResource
+                                PlayRegular}"
+                                          Foreground="White"/>
+                                <TextBlock Text="Run the game"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Margin="5 0 0 0"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Height="35" Width="35"
+                                Opacity="100" Background="Transparent"
+                                CornerRadius="5" Click="OpenDirectory"
+                                Margin="10 0 0 0">
+                            <Button.Styles>
+                                <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                    <Setter Property="Background" 
+                                            Value="#50FFFFFF"/>
+                                </Style>
+                            </Button.Styles>
+                            <PathIcon Data="{StaticResource
+                                FolderRegular}"
+                                      Foreground="White"/>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </SplitView.Pane>
+            
+            <SplitView.PaneBackground>
+                <SolidColorBrush Opacity="50"
+                                 Color="Black"/>
+            </SplitView.PaneBackground>
+
+            <!-- Right Panel -->
+            <Grid>
+                <TabControl Width="350" HorizontalAlignment="Left">
+                    <TabItem>
+                        <TabItem.Header>
+                            <TextBlock VerticalAlignment="Center">
+                                Settings
+                            </TextBlock>
+                        </TabItem.Header>
+                        <TextBlock Text="Settings!"/>
+                    </TabItem>
+                    <TabItem>
+                        <TabItem.Header>
+                            <TextBlock VerticalAlignment="Center">
+                                Home
+                            </TextBlock>
+                        </TabItem.Header>
+                        <TextBlock Text="Home page!"/>
+                    </TabItem>
+                    <TabItem>
+                        <TabItem.Header>
+                            <TextBlock VerticalAlignment="Center">
+                                Modpacks
+                            </TextBlock>
+                        </TabItem.Header>
+                        <TextBlock Text="Modpacks!"/>
+                    </TabItem>
+                </TabControl>
+            </Grid>
+        </SplitView>
+        <!-- Authentication overlay -->
+        <Panel Name="Authentication" IsVisible="False">
+            <Rectangle HorizontalAlignment="Stretch"
+                       VerticalAlignment="Stretch"
+                       Fill="Black" Opacity="40"/>
+            <TabControl>
+                <TabItem>
+                    <TabItem.Header>
+                        <TextBlock Text="Accounts"/>
+                    </TabItem.Header>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Select account"
+                                   FontSize="24" FontWeight="Bold"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="You need to select an account"
+                                   FontSize="16"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="to use for authentication"
+                                   FontSize="16" Margin="0 0 0 10"
+                                   HorizontalAlignment="Center"/>
+                        <ComboBox HorizontalAlignment="Center"
+                                  Width="200"/>
+                        <Button Height="35" Width="100"
+                                Background="#1fa803"
+                                Opacity="20"
+                                CornerRadius="5"
+                                HorizontalAlignment="Center"
+                                Margin="0 10 0 0">
+                            <Button.Styles>
+                                <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                    <Setter Property="Background" 
+                                            Value="#22cb00"/>
+                                </Style>
+                            </Button.Styles>
+                            <TextBlock Text="Select this"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Button>
+                    </StackPanel>
+                </TabItem>
+                <TabItem>
+                    <TabItem.Header>
+                        <TextBlock Text="Nickname"/>
+                    </TabItem.Header>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="No authentication"
+                                   FontSize="24" FontWeight="Bold"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="This type of authentication won't allow you"
+                                   FontSize="16"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="to play on online-mode servers"
+                                   FontSize="16" Margin="0 0 0 25"
+                                   HorizontalAlignment="Center"/>
+                        <TextBox Width="300" Watermark="Username"
+                                 Name="UsernameNickname"/>
+                        <Button Height="35" Width="125"
+                                Background="#1fa803"
+                                Opacity="20"
+                                CornerRadius="5"
+                                HorizontalAlignment="Center"
+                                Margin="0 10 0 0">
+                            <Button.Styles>
+                                <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                    <Setter Property="Background" 
+                                            Value="#22cb00"/>
+                                </Style>
+                                <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                                    <Setter Property="Background" 
+                                            Value="#27d803"/>
+                                </Style>
+                            </Button.Styles>
+                            <StackPanel Orientation="Horizontal">
+                                <PathIcon Data="{StaticResource
+                                AddRegular}"
+                                          Foreground="White"/>
+                                <TextBlock Text="Add account"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Margin="5 0 0 0"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </TabItem>
+                <TabItem>
+                    <TabItem.Header>
+                        <TextBlock Text="Microsoft"/>
+                    </TabItem.Header>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Microsoft Account"
+                                   FontSize="24" FontWeight="Bold"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="This type of authentication will allow you"
+                                   FontSize="16"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="to play on online-mode servers. You would need"
+                                   FontSize="16"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="to login on a website, and copy the JSON data"
+                                   FontSize="16"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="you get after logging in."
+                                   FontSize="16" Margin="0 0 0 25"
+                                   HorizontalAlignment="Center"/>
+                        <TextBox Width="300" Watermark="Raw JSON data"
+                                 Name="MicrosoftJson"/>
+                        <StackPanel Orientation="Horizontal"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Center">
+                            <Button Height="35" Width="90"
+                                Background="#747474"
+                                Opacity="20"
+                                CornerRadius="5"
+                                HorizontalAlignment="Center"
+                                Margin="0 10 10 0">
+                            <Button.Styles>
+                                <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                    <Setter Property="Background" 
+                                            Value="#9a9a9a"/>
+                                </Style>
+                            </Button.Styles>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Open link"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Margin="5 0 0 0"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Height="35" Width="125"
+                                Background="#1fa803"
+                                Opacity="20"
+                                CornerRadius="5"
+                                HorizontalAlignment="Center"
+                                Margin="0 10 0 0">
+                            <Button.Styles>
+                                <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                    <Setter Property="Background" 
+                                            Value="#22cb00"/>
+                                </Style>
+                            </Button.Styles>
+                            <StackPanel Orientation="Horizontal">
+                                <PathIcon Data="{StaticResource
+                                AddRegular}"
+                                          Foreground="White"/>
+                                <TextBlock Text="Add account"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Margin="5 0 0 0"/>
+                            </StackPanel>
+                        </Button>
+                        </StackPanel>
+                    </StackPanel>
+                </TabItem>
+                <TabItem>
+                    <TabItem.Header>
+                        <TextBlock Text="Mojang"/>
+                    </TabItem.Header>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Mojang Account"
+                                   FontSize="24" FontWeight="Bold"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="This type of authentication will allow you"
+                                   FontSize="16"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="to play on online-mode servers"
+                                   FontSize="16" Margin="0 0 0 25"
+                                   HorizontalAlignment="Center"/>
+                        <TextBox Width="300" Watermark="Username"
+                                 Name="UsenameMojang"
+                                 Margin="0 0 0 10"/>
+                        <TextBox Width="300" Watermark="Password"
+                                 Name="PasswordMojang"/>
+                        <Button Height="35" Width="125"
+                                Background="#1fa803"
+                                Opacity="20"
+                                CornerRadius="5"
+                                HorizontalAlignment="Center"
+                                Margin="0 10 0 0">
+                            <Button.Styles>
+                                <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                    <Setter Property="Background" 
+                                            Value="#22cb00"/>
+                                </Style>
+                                <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                                    <Setter Property="Background" 
+                                            Value="#27d803"/>
+                                </Style>
+                            </Button.Styles>
+                            <StackPanel Orientation="Horizontal">
+                                <PathIcon Data="{StaticResource
+                                AddRegular}"
+                                          Foreground="White"/>
+                                <TextBlock Text="Add account"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Margin="5 0 0 0"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </TabItem>
+            </TabControl>
+            <Button HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Width="35" Height="35"
+                    Background="#00FF0000"
+                    Click="CloseAuthPanel">
+                <Button.Styles>
+                    <Style Selector="Button:pointerover /template/ ContentPresenter">
+                        <Setter Property="Background"
+                                Value="#50FF0000"/>
+                    </Style>
+                </Button.Styles>
+                <PathIcon Data="{StaticResource Close}"
+                          Opacity="100"/>
+            </Button>
+        </Panel>
+        <!-- Progress Bar -->
+        <Panel Height="35" VerticalAlignment="Bottom"
+               IsVisible="False">
+            <ProgressBar Height="35" CornerRadius="0"
+                         Opacity="2" Value="25"
+                         Name="ProgressBar"/>
+            <TextBlock Name="ProgressInfo" 
+                       Text="Downloading library example v1.0.0 any"
+                       Margin="0 10 0 0"
+                       HorizontalAlignment="Center"
+                       FontWeight="Bold"/>
+           
+            <StackPanel HorizontalAlignment="Left"
+                        Margin="5 0 0 0"
+                        Orientation="Horizontal">
+                <PathIcon Data="{StaticResource Speed}"
+                          Foreground="White"/>
+                <TextBlock Name="ProgressSpeed"
+                           Text="2.1 MB/s"
+                           Margin="5 0 0 8"
+                           VerticalAlignment="Bottom"
+                           HorizontalAlignment="Left"
+                           FontWeight="Bold"/>
+            </StackPanel>
+            <StackPanel HorizontalAlignment="Right"
+                        Margin="0 0 5 0"
+                        Orientation="Horizontal">
+                <PathIcon Data="{StaticResource Document}"
+                          Foreground="White"/>
+                <TextBlock Name="ProgressFiles"
+                           Text="5/24 files"
+                           Margin="5 0 0 8"
+                           VerticalAlignment="Bottom"
+                           HorizontalAlignment="Left"
+                           FontWeight="Bold"/>
+            </StackPanel>
+        </Panel>
+    </Panel>
+</Window>

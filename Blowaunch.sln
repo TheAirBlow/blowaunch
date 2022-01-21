@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blowaunch.Library", "Blowau
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blowaunch.ConsoleApp", "Blowaunch.ConsoleApp\Blowaunch.ConsoleApp.csproj", "{49F8F6F7-0A3A-401F-8320-19774E6B1E1C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blowaunch.AvaloniaApp", "Blowaunch.AvaloniaApp\Blowaunch.AvaloniaApp.csproj", "{F593C31C-1AAF-4613-8B72-B9409B821083}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{49F8F6F7-0A3A-401F-8320-19774E6B1E1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{49F8F6F7-0A3A-401F-8320-19774E6B1E1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{49F8F6F7-0A3A-401F-8320-19774E6B1E1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F593C31C-1AAF-4613-8B72-B9409B821083}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F593C31C-1AAF-4613-8B72-B9409B821083}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F593C31C-1AAF-4613-8B72-B9409B821083}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F593C31C-1AAF-4613-8B72-B9409B821083}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

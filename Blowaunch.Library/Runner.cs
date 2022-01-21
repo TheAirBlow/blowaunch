@@ -93,10 +93,15 @@ namespace Blowaunch.Library
             [JsonProperty("customResolution")] public bool CustomWindowSize;
             [JsonProperty("windowSize")] public Vector2 WindowSize = new(200, 200);
             [JsonProperty("version")] public string Version = "";
+            [JsonProperty("versionIndex")] public int VersionIndex;
+            [JsonProperty("lastVersionsCount")] public int LastVersionsCount;
             [JsonProperty("type")] public VersionType Type = VersionType.OfficialMojang;
             [JsonProperty("forceOffline")] public bool ForceOffline;
             [JsonProperty("isDemo")] public bool DemoUser;
             [JsonProperty("auth")] public AuthClass Auth = new();
+            [JsonProperty("showBeta")] public bool ShowOldBeta;
+            [JsonProperty("showAlpha")] public bool ShowOldAlpha;
+            [JsonProperty("showSnaphots")] public bool ShowSnapshots;
         }
 
         /// <summary>
