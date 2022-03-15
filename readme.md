@@ -34,7 +34,7 @@ Here is how the config looks like (with comments):
   "auth": { // Authentication
     "validUntil": "0001-01-01T00:00:00", // Internal (Microsoft)
     "refreshToken": "", // Internal (Microsoft)
-    "type": 3,   // https://github.com/TheAirBlow/blowaunch/blob/main/Blowaunch.Library/Runner.cs#L52
+    "type": 3,   // https://github.com/TheAirBlow/blowaunch/blob/main/Blowaunch.Library/Runner.cs#L33
     "token": "", // Your auth token (Mojang) / Internal (Microsoft)
     "uuid": "",  // Your UUID (Mojang) / Internal (Microsoft)
 	"xuid": "",  // Internal (Microsoft)
