@@ -1,38 +1,47 @@
-namespace Blowaunch.Library.Authentication
+namespace Blowaunch.Library.Authentication;
+
+/// <summary>
+/// Blowaunch Authentication Server endpoints
+/// </summary>
+public static class Endpoints
 {
+    public static string BlowaunchServer = "https://blowaunch-server.herokuapp.com";
+    public static string MinecraftServer = "https://api.minecraftservices.com/";
+    public static string XboxAuthServer = "https://user.auth.xboxlive.com/";
+    public static string XboxXstsServer = "https://xsts.auth.xboxlive.com/";
+    public static string MojangServer = "https://authserver.mojang.com";
+    public static string MojangApi = "https://api.mojang.com";
+
     /// <summary>
-    /// Blowaunch Authentication Server endpoints
+    /// Mojang endpoints
     /// </summary>
-    public static class Endpoints
+    public static class Mojang
     {
-        /// <summary>
-        /// Hosted Blowaunch Authentication Server
-        /// </summary>
-        private static string Server = "https://blowaunch-server.herokuapp.com";
+        public static readonly string Login = "/authenticate";
+        public static readonly string Refresh = "/refresh";
+        public static readonly string Validate = "/validate";
+        public static readonly string Invalidate = "/invalidate";
+    }
 
-        /// <summary>
-        /// Mojang endpoints
-        /// </summary>
-        public static class Mojang
-        {
-            public static readonly string Login = Server + "/mojang/login?username={0}&password={1}";
-            public static readonly string Refresh = Server + "/mojang/refresh?token={0}&id={1}&name={2}";
-            public static readonly string Validate = Server + "/mojang/validate?token={0}";
-            public static readonly string Invalidate = Server + "/mojang/invalidate?token={0}";
-        }
+    /// <summary>
+    /// Minecraft endpoints
+    /// </summary>
+    public static class Microsoft
+    {
+        public static readonly string LoginBrowser = "microsoft/login";
+        public static readonly string XboxLiveAuth = "user/authenticate";
+        public static readonly string XboxXstsAuth = "xsts/authorize";
+        public static readonly string MinecraftAuth = "authentication/login_with_xbox";
+        public static readonly string MinecraftProfile = "minecraft/profile";
+        public static readonly string Refresh = "microsoft/refresh?token={0}";
+    }
 
-        /// <summary>
-        /// Minecraft endpoints
-        /// </summary>
-        public static class Microsoft
-        {
-            public static readonly string LoginBrowser = Server + "/microsoft/login";
-            public static readonly string Refresh = Server + "/microsoft/refresh?token={0}";
-            public static readonly string XboxLogin = Server + "/xbox/login?token={0}";
-            public static readonly string XboxXsts = Server + "/xbox/xsts?userhash={1}&token={0}";
-            public static readonly string MinecraftLogin = Server + "/minecraft/login?userhash={1}&token={0}";
-            public static readonly string Ownership = Server + "/minecraft/ownership?token={0}";
-            public static readonly string Profile = Server + "/minecraft/profile?token={0}";
-        }
+    /// <summary>
+    /// Security questions
+    /// </summary>
+    public static class Security
+    {
+        public static readonly string Location = "user/security/location";
+        public static readonly string Challenges = "user/security/challenges";
     }
 }

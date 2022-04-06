@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Blowaunch.Library
+namespace Blowaunch.Library;
+
+public class ForgeJson
 {
-    public class ForgeJson
-    {
-        [JsonProperty("versions")] public Dictionary<string, string> Versions;
-    }
+    [JsonProperty("versions")] public Dictionary<string, string> Versions;
 }

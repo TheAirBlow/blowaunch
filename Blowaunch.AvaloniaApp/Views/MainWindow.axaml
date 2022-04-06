@@ -1,6 +1,5 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:Blowaunch.AvaloniaApp.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -14,10 +13,6 @@
         <ImageBrush Source="/Assets/background.png"
                     Opacity="100"/>
     </Window.Background>
-
-    <Design.DataContext>
-        <vm:MainWindowViewModel/>
-    </Design.DataContext>
     
     <Panel>
         <SplitView IsPaneOpen="True"
@@ -39,12 +34,14 @@
                             Margin="20 0 20 10">
                         <Panel>
                             <StackPanel Height="62">
-                                <TextBlock Text="TheAirBlow" FontWeight="Bold"
+                                <TextBlock Text="[No Account]" FontWeight="Bold"
                                            HorizontalAlignment="Left"
-                                           Margin="20 10 20 0"/>
+                                           Margin="20 10 20 0"
+                                           Name="AccountName"/>
                                 <TextBlock Text="No authentication"
                                            HorizontalAlignment="Left"
-                                           Margin="20 5 20 0"/>
+                                           Margin="20 5 20 0"
+                                           Name="AccountType"/>
                             </StackPanel>
                             <Button HorizontalAlignment="Right"
                                     Height="62" Width="80"
@@ -62,6 +59,7 @@
                                Margin="0 30 0 10"/>
                     <ComboBox HorizontalAlignment="Center"
                               Width="200" SelectedIndex="0"
+                              VirtualizationMode="Simple"
                               Name="Versions">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
@@ -143,14 +141,208 @@
 
             <!-- Right Panel -->
             <Grid>
-                <TabControl Width="350" HorizontalAlignment="Left">
+                <TabControl Width="520" HorizontalAlignment="Left">
                     <TabItem>
                         <TabItem.Header>
                             <TextBlock VerticalAlignment="Center">
                                 Settings
                             </TextBlock>
                         </TabItem.Header>
-                        <TextBlock Text="Settings!"/>
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal">
+                                <Border Background="Black"
+                                        BorderBrush="White"
+                                        Opacity="50"
+                                        BorderThickness="2"
+                                        CornerRadius="3"
+                                        Padding="10"
+                                        Margin="0 0 5 0">
+                                    <StackPanel Orientation="Vertical"
+                                                Width="200">
+                                        <TextBlock HorizontalAlignment="Center"
+                                                   FontSize="18">
+                                            Window Size
+                                        </TextBlock>
+                                        <ToggleSwitch OffContent="Custom Window Size"
+                                                      OnContent="Custom Window Size"
+                                                      Name="CustomWindowSize">
+                                        </ToggleSwitch>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       FontSize="14" Margin="0 0 10 0">
+                                                Width: 
+                                            </TextBlock>
+                                            <NumericUpDown Watermark="Width" Width="145"
+                                                           Margin="0 5 0 5"
+                                                           Name="WindowWidth"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       FontSize="14" Margin="0 0 10 0">
+                                                Height: 
+                                            </TextBlock>
+                                            <NumericUpDown Watermark="Height" Width="140"
+                                                           Margin="0 5 0 10"
+                                                           Name="WindowHeight"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                                <Border Background="Black"
+                                        BorderBrush="White"
+                                        Opacity="50"
+                                        BorderThickness="2"
+                                        CornerRadius="3"
+                                        Padding="10">
+                                    <StackPanel Orientation="Vertical"
+                                                Width="240">
+                                        <TextBlock HorizontalAlignment="Center"
+                                                   FontSize="18" Margin="0 0 0 5">
+                                            Runner Settings
+                                        </TextBlock>
+                                        <TextBox Width="240" Watermark="Java Arguments"
+                                                 Margin="0 0 10 5"
+                                                 Name="JavaArguments">
+                                        </TextBox>
+                                        <TextBox Width="240" Watermark="Game Arguments"
+                                                 Margin="0 0 10 10"
+                                                 Name="GameArguments">
+                                        </TextBox>
+                                        <StackPanel Orientation="Horizontal"
+                                                    HorizontalAlignment="Center">
+                                            <TextBlock HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       FontSize="14">
+                                                RAM allocation
+                                            </TextBlock>
+                                            <NumericUpDown Width="125" Watermark="Manual"
+                                                     Margin="10 0 0 0"
+                                                     Name="RamManual">
+                                            </NumericUpDown>
+                                        </StackPanel>
+                                        <Slider Margin="0 -15 0 -15"
+                                                Name="RamSlider"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal"
+                                        Margin="0 5 0 0">
+                                <Border Background="Black"
+                                        BorderBrush="White"
+                                        Opacity="50"
+                                        BorderThickness="2"
+                                        CornerRadius="3"
+                                        Padding="10"
+                                        Margin="0 0 5 0">
+                                    <StackPanel Orientation="Vertical"
+                                                Width="160">
+                                        <TextBlock HorizontalAlignment="Center"
+                                                   FontSize="18" Margin="0 0 0 5">
+                                            Versions
+                                        </TextBlock>
+                                        <ToggleSwitch OnContent="Show Snaphots"
+                                                      OffContent="Show Snaphots"
+                                                      Name="ShowSnapshots">
+                                        </ToggleSwitch>
+                                        <ToggleSwitch OnContent="Show Beta"
+                                                      OffContent="Show Beta"
+                                                      Name="ShowBeta">
+                                        </ToggleSwitch>
+                                        <ToggleSwitch OnContent="Show Alpha"
+                                                      OffContent="Show Alpha"
+                                                      Name="ShowAlpha">
+                                        </ToggleSwitch>
+                                    </StackPanel>
+                                </Border>
+                                <Border Background="Black"
+                                        BorderBrush="White"
+                                        Opacity="50"
+                                        BorderThickness="2"
+                                        CornerRadius="3"
+                                        Padding="10">
+                                    <StackPanel Orientation="Vertical"
+                                                Width="200">
+                                        <TextBlock HorizontalAlignment="Center"
+                                                   FontSize="18" Margin="0 0 0 5">
+                                            Additional
+                                        </TextBlock>
+                                        <ToggleSwitch OnContent="Force Offline Mode"
+                                                      OffContent="Force Offline Mode"
+                                                      Name="ForceOffline">
+                                        </ToggleSwitch>
+                                        <ToggleSwitch OnContent="Minecraft Demo Mode"
+                                                      OffContent="Minecraft Demo Mode"
+                                                      Name="MinecraftDemo">
+                                        </ToggleSwitch>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                            <Border Background="Black"
+                                    BorderBrush="White"
+                                    Opacity="50"
+                                    BorderThickness="2"
+                                    CornerRadius="3"
+                                    Padding="10"
+                                    Margin="0 10 0 0"
+                                    HorizontalAlignment="Left">
+                                <StackPanel Orientation="Horizontal"
+                                            Opacity="10">
+                                    <Button Height="35" Width="110"
+                                            Background="#1fa803"
+                                            Opacity="20"
+                                            CornerRadius="5"
+                                            HorizontalAlignment="Center"
+                                            Margin="0 0 10 0"
+                                            Name="SaveChanges"
+                                            Click="SaveChanges">
+                                        <Button.Styles>
+                                            <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                                <Setter Property="Background" 
+                                                        Value="#22cb00"/>
+                                            </Style>
+                                        </Button.Styles>
+                                        <TextBlock Text="Save changes"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </Button>
+                                    <Button Height="35" Width="125"
+                                            Background="#ebcd38"
+                                            Opacity="20" 
+                                            CornerRadius="5"
+                                            HorizontalAlignment="Center"
+                                            Margin="0 0 10 0"
+                                            Name="RevertChanges"
+                                            Click="RevertChanges">
+                                        <Button.Styles>
+                                            <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                                <Setter Property="Background" 
+                                                        Value="#ab952b"/>
+                                            </Style>
+                                        </Button.Styles>
+                                        <TextBlock Text="Revert changes"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </Button>
+                                    <Button Height="35" Width="120"
+                                            Background="#eb4034"
+                                            Opacity="20"
+                                            CornerRadius="5"
+                                            HorizontalAlignment="Center"
+                                            Click="ResetSettings">
+                                        <Button.Styles>
+                                            <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                                <Setter Property="Background" 
+                                                        Value="#ad2d24"/>
+                                            </Style>
+                                        </Button.Styles>
+                                        <TextBlock Text="Back to default"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </Button>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
                     </TabItem>
                     <TabItem>
                         <TabItem.Header>
@@ -158,7 +350,6 @@
                                 Home
                             </TextBlock>
                         </TabItem.Header>
-                        <TextBlock Text="Home page!"/>
                     </TabItem>
                     <TabItem>
                         <TabItem.Header>
@@ -166,16 +357,17 @@
                                 Modpacks
                             </TextBlock>
                         </TabItem.Header>
-                        <TextBlock Text="Modpacks!"/>
                     </TabItem>
                 </TabControl>
             </Grid>
         </SplitView>
+        
         <!-- Authentication overlay -->
-        <Panel Name="Authentication" IsVisible="False">
+        <Panel Name="Authentication" 
+               IsVisible="False">
             <Rectangle HorizontalAlignment="Stretch"
                        VerticalAlignment="Stretch"
-                       Fill="Black" Opacity="40"/>
+                       Fill="Black" Opacity="30"/>
             <TabControl>
                 <TabItem>
                     <TabItem.Header>
@@ -192,23 +384,52 @@
                                    FontSize="16" Margin="0 0 0 10"
                                    HorizontalAlignment="Center"/>
                         <ComboBox HorizontalAlignment="Center"
-                                  Width="200"/>
-                        <Button Height="35" Width="100"
-                                Background="#1fa803"
-                                Opacity="20"
-                                CornerRadius="5"
-                                HorizontalAlignment="Center"
-                                Margin="0 10 0 0">
-                            <Button.Styles>
-                                <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                                    <Setter Property="Background" 
-                                            Value="#22cb00"/>
-                                </Style>
-                            </Button.Styles>
-                            <TextBlock Text="Select this"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"/>
-                        </Button>
+                                  Width="200" Name="Accounts"
+                                  SelectedIndex="0">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <StackPanel Orientation="Horizontal"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Center">
+                            <Button Height="35" Width="100"
+                                    Background="#1fa803"
+                                    Opacity="20"
+                                    CornerRadius="5"
+                                    HorizontalAlignment="Center"
+                                    Margin="0 10 10 0"
+                                    Click="SelectAccount">
+                                <Button.Styles>
+                                    <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="Background" 
+                                                Value="#22cb00"/>
+                                    </Style>
+                                </Button.Styles>
+                                <TextBlock Text="Select this"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                            </Button>
+                            <Button Height="35" Width="70"
+                                    Background="#e63f29"
+                                    Opacity="20"
+                                    CornerRadius="5"
+                                    HorizontalAlignment="Center"
+                                    Margin="0 10 0 0"
+                                    Click="DeleteAccount">
+                                <Button.Styles>
+                                    <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="Background" 
+                                                Value="#a32d1d"/>
+                                    </Style>
+                                </Button.Styles>
+                                <TextBlock Text="Delete"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                            </Button>
+                        </StackPanel>
                     </StackPanel>
                 </TabItem>
                 <TabItem>
@@ -226,13 +447,14 @@
                                    FontSize="16" Margin="0 0 0 25"
                                    HorizontalAlignment="Center"/>
                         <TextBox Width="300" Watermark="Username"
-                                 Name="UsernameNickname"/>
+                                 Name="UsernameCracked"/>
                         <Button Height="35" Width="125"
                                 Background="#1fa803"
                                 Opacity="20"
                                 CornerRadius="5"
                                 HorizontalAlignment="Center"
-                                Margin="0 10 0 0">
+                                Margin="0 10 0 0"
+                                Click="CrackedLogin">
                             <Button.Styles>
                                 <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                                     <Setter Property="Background" 
@@ -266,61 +488,39 @@
                         <TextBlock Text="This type of authentication will allow you"
                                    FontSize="16"
                                    HorizontalAlignment="Center"/>
-                        <TextBlock Text="to play on online-mode servers. You would need"
+                        <TextBlock Text="to play on online-mode servers. Browser"
                                    FontSize="16"
                                    HorizontalAlignment="Center"/>
-                        <TextBlock Text="to login on a website, and copy the JSON data"
+                        <TextBlock Text="would open for you to login."
                                    FontSize="16"
                                    HorizontalAlignment="Center"/>
-                        <TextBlock Text="you get after logging in."
-                                   FontSize="16" Margin="0 0 0 25"
-                                   HorizontalAlignment="Center"/>
-                        <TextBox Width="300" Watermark="Raw JSON data"
-                                 Name="MicrosoftJson"/>
                         <StackPanel Orientation="Horizontal"
                                     VerticalAlignment="Center"
                                     HorizontalAlignment="Center">
-                            <Button Height="35" Width="90"
-                                Background="#747474"
-                                Opacity="20"
-                                CornerRadius="5"
-                                HorizontalAlignment="Center"
-                                Margin="0 10 10 0">
-                            <Button.Styles>
-                                <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                                    <Setter Property="Background" 
-                                            Value="#9a9a9a"/>
-                                </Style>
-                            </Button.Styles>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="Open link"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"
-                                           Margin="5 0 0 0"/>
-                            </StackPanel>
-                        </Button>
-                        <Button Height="35" Width="125"
-                                Background="#1fa803"
-                                Opacity="20"
-                                CornerRadius="5"
-                                HorizontalAlignment="Center"
-                                Margin="0 10 0 0">
-                            <Button.Styles>
-                                <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                                    <Setter Property="Background" 
-                                            Value="#22cb00"/>
-                                </Style>
-                            </Button.Styles>
-                            <StackPanel Orientation="Horizontal">
-                                <PathIcon Data="{StaticResource
+                            <Button Height="35" Width="125"
+                                    Background="#1fa803"
+                                    Opacity="20"
+                                    CornerRadius="5"
+                                    HorizontalAlignment="Center"
+                                    Margin="0 10 0 0"
+                                    Name="LoginButton"
+                                    Click="MicrosoftLogin">
+                                <Button.Styles>
+                                    <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="Background" 
+                                                Value="#22cb00"/>
+                                    </Style>
+                                </Button.Styles>
+                                <StackPanel Orientation="Horizontal">
+                                    <PathIcon Data="{StaticResource
                                 AddRegular}"
-                                          Foreground="White"/>
-                                <TextBlock Text="Add account"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"
-                                           Margin="5 0 0 0"/>
-                            </StackPanel>
-                        </Button>
+                                              Foreground="White"/>
+                                    <TextBlock Text="Add account"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Margin="5 0 0 0"/>
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
                     </StackPanel>
                 </TabItem>
@@ -339,16 +539,19 @@
                                    FontSize="16" Margin="0 0 0 25"
                                    HorizontalAlignment="Center"/>
                         <TextBox Width="300" Watermark="Username"
-                                 Name="UsenameMojang"
+                                 Name="UsernameMojang"
                                  Margin="0 0 0 10"/>
                         <TextBox Width="300" Watermark="Password"
-                                 Name="PasswordMojang"/>
+                                 Name="PasswordMojang"
+                                 PasswordChar="*"/>
                         <Button Height="35" Width="125"
                                 Background="#1fa803"
                                 Opacity="20"
                                 CornerRadius="5"
                                 HorizontalAlignment="Center"
-                                Margin="0 10 0 0">
+                                Margin="0 10 0 0"
+                                Click="MojangLogin"
+                                Name="MojangButton">
                             <Button.Styles>
                                 <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                                     <Setter Property="Background" 
@@ -387,37 +590,42 @@
                           Opacity="100"/>
             </Button>
         </Panel>
+        
+        <!-- Loading overlay -->
+        <Panel IsVisible="True"
+               Name="Loading">
+            <Rectangle HorizontalAlignment="Stretch"
+                       VerticalAlignment="Stretch"
+                       Fill="Black" Opacity="30"/>
+            <StackPanel HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+                <TextBlock FontSize="24">
+                    Blowauncher is currently loading,
+                </TextBlock>
+                <TextBlock HorizontalAlignment="Center"
+                           FontSize="24">
+                    please wait a few seconds...
+                </TextBlock>
+            </StackPanel>
+        </Panel>
+        
         <!-- Progress Bar -->
         <Panel Height="35" VerticalAlignment="Bottom"
-               IsVisible="False">
+               IsVisible="False" Name="ProgressPanel">
             <ProgressBar Height="35" CornerRadius="0"
-                         Opacity="2" Value="25"
+                         Opacity="2" Value="0"
                          Name="ProgressBar"/>
-            <TextBlock Name="ProgressInfo" 
-                       Text="Downloading library example v1.0.0 any"
-                       Margin="0 10 0 0"
-                       HorizontalAlignment="Center"
+            <TextBlock Name="ProgressInfo"
+                       Margin="10 10 0 0"
+                       HorizontalAlignment="Left"
                        FontWeight="Bold"/>
-           
-            <StackPanel HorizontalAlignment="Left"
-                        Margin="5 0 0 0"
-                        Orientation="Horizontal">
-                <PathIcon Data="{StaticResource Speed}"
-                          Foreground="White"/>
-                <TextBlock Name="ProgressSpeed"
-                           Text="2.1 MB/s"
-                           Margin="5 0 0 8"
-                           VerticalAlignment="Bottom"
-                           HorizontalAlignment="Left"
-                           FontWeight="Bold"/>
-            </StackPanel>
             <StackPanel HorizontalAlignment="Right"
-                        Margin="0 0 5 0"
+                        Margin="0 0 10 0"
                         Orientation="Horizontal">
                 <PathIcon Data="{StaticResource Document}"
                           Foreground="White"/>
                 <TextBlock Name="ProgressFiles"
-                           Text="5/24 files"
+                           Text="0/1 files"
                            Margin="5 0 0 8"
                            VerticalAlignment="Bottom"
                            HorizontalAlignment="Left"
