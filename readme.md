@@ -7,8 +7,8 @@
 ![изображение](https://user-images.githubusercontent.com/68467762/162453223-cbe3eedf-c364-4fab-90f5-5416ee820d1a.png)
 
 ## 🎮 About Blowaunch
-This is crossplatform open-source Minecraft launcher, written in C#.
-Runs 1.7.2 and newer versions without any problems.
+This is crossplatform open-source Minecraft launcher, written in C#. \
+Runs 1.7.2 and newer versions without any problems. \
 **Curretly in development!**
 
 ## 🚀 Getting Started
