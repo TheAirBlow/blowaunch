@@ -1,6 +1,5 @@
 # Blowaunch
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/TheAirBlow/Blowaunch/graphs/commit-activity) 
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com) 
 [![GitHub issues](https://img.shields.io/github/issues-raw/gorilla-devs/GDLauncher.svg)](https://github.com/TheAirBlow/Blowaunch/issues) 
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/gorilla-devs/GDLauncher.svg)](https://github.com/TheAirBlow/Blowaunch/pulls) 
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/TheAirBlow/Blowaunch.svg) 
