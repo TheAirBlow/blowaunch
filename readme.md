@@ -1,7 +1,7 @@
 # Blowaunch
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/TheAirBlow/Blowaunch/graphs/commit-activity) 
-[![GitHub issues](https://img.shields.io/github/issues-raw/gorilla-devs/GDLauncher.svg)](https://github.com/TheAirBlow/Blowaunch/issues) 
-[![GitHub pull requests](https://img.shields.io/github/issues-pr/gorilla-devs/GDLauncher.svg)](https://github.com/TheAirBlow/Blowaunch/pulls) 
+[![GitHub issues](https://img.shields.io/github/issues-raw/TheAirBlow/blowaunch.svg)](https://github.com/TheAirBlow/Blowaunch/issues) 
+[![GitHub pull requests](https://img.shields.io/github/issues-pr/TheAirBlow/blowaunch.svg)](https://github.com/TheAirBlow/Blowaunch/pulls) 
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/TheAirBlow/Blowaunch.svg) 
 ![Github All Releases](https://img.shields.io/github/downloads/TheAirBlow/Blowaunch/total.svg) \
 ![изображение](https://user-images.githubusercontent.com/68467762/162453223-cbe3eedf-c364-4fab-90f5-5416ee820d1a.png)
