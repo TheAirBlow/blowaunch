@@ -55,38 +55,38 @@ namespace Blowaunch.Library
                 /// Official Mojang version
                 /// </summary>
                 OfficialMojang = 0,
-                
-                /// <summary>
-                /// A custom version located in .blowaunch/versions
-                /// </summary>
-                CustomVersionFromDir = 1,
-                
-                /// <summary>
-                /// Custom version with an addon config file in the
-                /// directory with the version and with name "addon.json"
-                /// </summary>
-                CustomWithAddonConfig = 2,
-                
-                /// <summary>
-                /// Official Mojang version with an addon config file
-                /// in the directory with the version and with name "addon.json"
-                /// </summary>
-                OfficialWithAddonConfig = 3,
-                
+
                 /// <summary>
                 /// Official Mojang version with an addon config file
                 /// that loads Forge Mod Loader, downloaded from GitHub repo
                 /// </summary>
-                OfficialWithForgeModLoader = 4,
+                OfficialWithForgeModLoader = 1,
                 
                 /// <summary>
                 /// Official Mojang version with an addon config file
                 /// that loads Fabric Mod Loader, downloaded from their API
                 /// </summary>
-                OfficialWithFabricModLoader = 5
+                OfficialWithFabricModLoader = 2,
+                
+                /// <summary>
+                /// A custom version located in .blowaunch/versions
+                /// </summary>
+                CustomVersionFromDir = 3,
+                
+                /// <summary>
+                /// Custom version with an addon config file in the
+                /// directory with the version and with name "addon.json"
+                /// </summary>
+                CustomWithAddonConfig = 4,
+                
+                /// <summary>
+                /// Official Mojang version with an addon config file
+                /// in the directory with the version and with name "addon.json"
+                /// </summary>
+                OfficialWithAddonConfig = 5
             }
 
-            [JsonProperty("maxRam")] public string RamMax = "";
+            [JsonProperty("maxRam")] public string RamMax = "1024M";
             [JsonProperty("jvmArgs")] public string JvmArgs = "";
             [JsonProperty("gameArgs")] public string GameArgs = "";
             [JsonProperty("username")] public string UserName = "";

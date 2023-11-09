@@ -69,15 +69,13 @@
                                 Name}" />
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
-                        <ComboBoxItem>
-                            <TextBlock Text="Loading..."/>
-                        </ComboBoxItem>
                     </ComboBox>
                     <TextBlock Text="Modding:" 
                                HorizontalAlignment="Center"
                                Margin="0 20 0 10"/>
                     <ComboBox HorizontalAlignment="Center"
-                              Width="200" SelectedIndex="0">
+                              Width="200" SelectedIndex="0"
+                              Name="Modding">
                         <ComboBoxItem Name="Vanilla">
                             <TextBlock Text="None"
                                        HorizontalAlignment="Left"/>
@@ -96,16 +94,16 @@
                                 Margin="0 15 0 0">
                         <Button Height="35" Width="135"
                                 Background="#1fa803"
-                                Opacity="20"
+                                Opacity="20" Name="RunGame"
                                 CornerRadius="5">
                             <Button.Styles>
                                 <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                                     <Setter Property="Background" 
                                             Value="#22cb00"/>
                                 </Style>
-                                <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                                <Style Selector="Button:disabled /template/ ContentPresenter#PART_ContentPresenter">
                                     <Setter Property="Background" 
-                                            Value="#27d803"/>
+                                            Value="#1a9b00"/>
                                 </Style>
                             </Button.Styles>
                             <StackPanel Orientation="Horizontal">
@@ -143,15 +141,7 @@
 
             <!-- Right Panel -->
             <Grid>
-                <TabControl Width="350" HorizontalAlignment="Left">
-                    <TabItem>
-                        <TabItem.Header>
-                            <TextBlock VerticalAlignment="Center">
-                                Settings
-                            </TextBlock>
-                        </TabItem.Header>
-                        <TextBlock Text="Settings!"/>
-                    </TabItem>
+                <TabControl>
                     <TabItem>
                         <TabItem.Header>
                             <TextBlock VerticalAlignment="Center">
@@ -167,6 +157,167 @@
                             </TextBlock>
                         </TabItem.Header>
                         <TextBlock Text="Modpacks!"/>
+                    </TabItem>
+                    <TabItem>
+                        <TabItem.Header>
+                            <TextBlock VerticalAlignment="Center">
+                                Settings
+                            </TextBlock>
+                        </TabItem.Header>
+                        <StackPanel HorizontalAlignment="Center">
+                            <StackPanel Orientation="Horizontal"
+                                        HorizontalAlignment="Center">
+                                <StackPanel HorizontalAlignment="Center"
+                                            Margin="10">
+                                    <TextBlock Text="JVM Arguments"
+                                               FontSize="18" Margin="0 0 0 10"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBox Width="230" Name="JavaArgs"/>
+                                </StackPanel>
+                                <StackPanel HorizontalAlignment="Center"
+                                            Margin="10">
+                                    <TextBlock Text="Game Arguments"
+                                               FontSize="18" Margin="0 0 0 10"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBox Width="230" Name="GameArgs"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal"
+                                        HorizontalAlignment="Center">
+                                <StackPanel HorizontalAlignment="Center"
+                                            Margin="10">
+                                    <TextBlock Text="Window Size"
+                                               FontSize="18" Margin="0 0 0 10"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBox Width="200" Name="WindowSize"
+                                             Watermark="1080x896, for example"/>
+                                    <ToggleSwitch HorizontalAlignment="Center"
+                                                  OffContent="Full screen"
+                                                  OnContent="Full screen"
+                                                  IsChecked="True"
+                                                  Name="FullScreen"
+                                                  Checked="DisableResolution"
+                                                  Unchecked="EnableResolution"/>
+                                </StackPanel>
+                                <StackPanel HorizontalAlignment="Center"
+                                            Margin="10">
+                                    <TextBlock Text="Other"
+                                               FontSize="18" Margin="0 0 0 10"
+                                               HorizontalAlignment="Center"/>
+                                    <StackPanel Orientation="Horizontal"
+                                                HorizontalAlignment="Center">
+                                        <ToggleSwitch HorizontalAlignment="Center"
+                                                      OffContent="Snaphots"
+                                                      OnContent="Snaphots"
+                                                      IsChecked="False"
+                                                      Name="ShowSnapshot"
+                                                      Margin="5"/>
+                                        <ToggleSwitch HorizontalAlignment="Center"
+                                                      OffContent="Alphas"
+                                                      OnContent="Alphas"
+                                                      IsChecked="False"
+                                                      Name="ShowAlpha"
+                                                      Margin="5"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal"
+                                                HorizontalAlignment="Center">
+                                        <ToggleSwitch HorizontalAlignment="Center"
+                                                      OffContent="Betas"
+                                                      OnContent="Betas"
+                                                      IsChecked="False"
+                                                      Name="ShowBeta"
+                                                      Margin="5"/>
+                                        <ToggleSwitch HorizontalAlignment="Center"
+                                                      OffContent="Demo Mode"
+                                                      OnContent="Demo Mode"
+                                                      IsChecked="False"
+                                                      Name="DemoMode"
+                                                      Margin="5"/>
+                                    </StackPanel>
+                                    <ToggleSwitch HorizontalAlignment="Center"
+                                                  OffContent="Force Offline Mode"
+                                                  OnContent="Force Offline Mode"
+                                                  IsChecked="False"
+                                                  Name="OfflineMode"
+                                                  Margin="5"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal"
+                                        HorizontalAlignment="Center">
+                                <StackPanel HorizontalAlignment="Center"
+                                            Margin="10">
+                                    <TextBlock Text="Maximum RAM usage"
+                                               FontSize="18" Margin="0 0 0 10"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBox Width="200" Name="MaxRam"
+                                             Watermark="1024M, for example"/>
+                                </StackPanel>
+                                <StackPanel HorizontalAlignment="Center"
+                                            Margin="10">
+                                    <TextBlock Text="Settings controls"
+                                               FontSize="18" Margin="0 0 0 10"
+                                               HorizontalAlignment="Center"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Height="35"
+                                                Background="#1fa803"
+                                                Opacity="20"
+                                                CornerRadius="5"
+                                                Margin="5"
+                                                Click="SaveSettings">
+                                            <Button.Styles>
+                                                <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                                    <Setter Property="Background" 
+                                                            Value="#22cb00"/>
+                                                </Style>
+                                                <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                                                    <Setter Property="Background" 
+                                                            Value="#27d803"/>
+                                                </Style>
+                                            </Button.Styles>
+                                            <TextBlock Text="Save changes"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       Margin="5 0 5 0"/>
+                                        </Button>
+                                        <Button Height="35"
+                                                Background="#FF9900"
+                                                Opacity="20"
+                                                CornerRadius="5"
+                                                Margin="5"
+                                                Click="LoadSettings">
+                                            <Button.Styles>
+                                                <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                                    <Setter Property="Background" 
+                                                            Value="#FFBB00"/>
+                                                </Style>
+                                            </Button.Styles>
+                                            <TextBlock Text="Reload config"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       Margin="5 0 5 0"/>
+                                        </Button>
+                                    </StackPanel>
+                                    <Button Height="35"
+                                            Background="#DD0000"
+                                            Opacity="20"
+                                            CornerRadius="5"
+                                            Margin="5"
+                                            HorizontalAlignment="Center"
+                                            Click="ResetSettings">
+                                        <Button.Styles>
+                                            <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                                <Setter Property="Background" 
+                                                        Value="#FF0000"/>
+                                            </Style>
+                                        </Button.Styles>
+                                        <TextBlock Text="Reset to defaults"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   Margin="5 0 5 0"/>
+                                    </Button>
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
                     </TabItem>
                 </TabControl>
             </Grid>
@@ -281,46 +432,46 @@
                                     VerticalAlignment="Center"
                                     HorizontalAlignment="Center">
                             <Button Height="35" Width="90"
-                                Background="#747474"
-                                Opacity="20"
-                                CornerRadius="5"
-                                HorizontalAlignment="Center"
-                                Margin="0 10 10 0">
-                            <Button.Styles>
-                                <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                                    <Setter Property="Background" 
-                                            Value="#9a9a9a"/>
-                                </Style>
-                            </Button.Styles>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="Open link"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"
-                                           Margin="5 0 0 0"/>
-                            </StackPanel>
-                        </Button>
-                        <Button Height="35" Width="125"
-                                Background="#1fa803"
-                                Opacity="20"
-                                CornerRadius="5"
-                                HorizontalAlignment="Center"
-                                Margin="0 10 0 0">
-                            <Button.Styles>
-                                <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                                    <Setter Property="Background" 
-                                            Value="#22cb00"/>
-                                </Style>
-                            </Button.Styles>
-                            <StackPanel Orientation="Horizontal">
-                                <PathIcon Data="{StaticResource
+                                    Background="#747474"
+                                    Opacity="20"
+                                    CornerRadius="5"
+                                    HorizontalAlignment="Center"
+                                    Margin="0 10 10 0">
+                                <Button.Styles>
+                                    <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="Background" 
+                                                Value="#9a9a9a"/>
+                                    </Style>
+                                </Button.Styles>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Open link"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Margin="5 0 0 0"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Height="35" Width="125"
+                                    Background="#1fa803"
+                                    Opacity="20"
+                                    CornerRadius="5"
+                                    HorizontalAlignment="Center"
+                                    Margin="0 10 0 0">
+                                <Button.Styles>
+                                    <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="Background" 
+                                                Value="#22cb00"/>
+                                    </Style>
+                                </Button.Styles>
+                                <StackPanel Orientation="Horizontal">
+                                    <PathIcon Data="{StaticResource
                                 AddRegular}"
-                                          Foreground="White"/>
-                                <TextBlock Text="Add account"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"
-                                           Margin="5 0 0 0"/>
-                            </StackPanel>
-                        </Button>
+                                              Foreground="White"/>
+                                    <TextBlock Text="Add account"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Margin="5 0 0 0"/>
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
                     </StackPanel>
                 </TabItem>
@@ -389,35 +540,21 @@
         </Panel>
         <!-- Progress Bar -->
         <Panel Height="35" VerticalAlignment="Bottom"
-               IsVisible="False">
+               IsVisible="False" Name="ProgressPanel">
             <ProgressBar Height="35" CornerRadius="0"
-                         Opacity="2" Value="25"
-                         Name="ProgressBar"/>
+                         Opacity="2" Name="ProgressBar"/>
             <TextBlock Name="ProgressInfo" 
-                       Text="Downloading library example v1.0.0 any"
-                       Margin="0 10 0 0"
-                       HorizontalAlignment="Center"
+                       Text="Please wait..."
+                       Margin="5 10 0 0"
+                       HorizontalAlignment="Left"
                        FontWeight="Bold"/>
-           
-            <StackPanel HorizontalAlignment="Left"
-                        Margin="5 0 0 0"
-                        Orientation="Horizontal">
-                <PathIcon Data="{StaticResource Speed}"
-                          Foreground="White"/>
-                <TextBlock Name="ProgressSpeed"
-                           Text="2.1 MB/s"
-                           Margin="5 0 0 8"
-                           VerticalAlignment="Bottom"
-                           HorizontalAlignment="Left"
-                           FontWeight="Bold"/>
-            </StackPanel>
             <StackPanel HorizontalAlignment="Right"
                         Margin="0 0 5 0"
                         Orientation="Horizontal">
                 <PathIcon Data="{StaticResource Document}"
                           Foreground="White"/>
                 <TextBlock Name="ProgressFiles"
-                           Text="5/24 files"
+                           Text="0/0 files"
                            Margin="5 0 0 8"
                            VerticalAlignment="Bottom"
                            HorizontalAlignment="Left"

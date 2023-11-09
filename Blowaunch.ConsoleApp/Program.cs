@@ -193,7 +193,8 @@ namespace Blowaunch.ConsoleApp
                         AnsiConsole.WriteLine($"[Official] The version is downloaded from Mojang's servers");
                         AnsiConsole.WriteLine($"[Official] The addon is downloaded from Forge's maven repo");
                         try { mainJson = MojangFetcher.GetMain(json.Version); } 
-                        catch {
+                        catch (Exception e) {
+                            AnsiConsole.WriteException(e);
                             AnsiConsole.MarkupLine("[red]Unable to fetch the version JSON![/]");
                             return;
                         }
